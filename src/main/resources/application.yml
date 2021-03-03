@@ -1,0 +1,18 @@
+spring:
+  jackson:
+    #json不返回null的属性
+    default-property-inclusion: non_null
+  profiles:
+    active: dev
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+#    ubuntu虚拟机
+#    url: jdbc:mysql://192.168.1.166:3306/app_todolist?useUnicode=true&characterEncoding=gbk
+#    本机
+    url: jdbc:mysql://localhost:3306/xlogin?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: xzlyf297
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
