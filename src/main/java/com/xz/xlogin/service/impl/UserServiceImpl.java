@@ -33,16 +33,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String isExistByPhone(String phone) {
-        return userRepo.isExistByUserNo(phone);
+        return userRepo.isExistByPhone(phone);
     }
 
     @Override
     public String isExistByEmail(String email) {
-        return userRepo.isExistByUserNo(email);
+        return userRepo.isExistByEmail(email);
     }
 
     @Override
     public String isExistByQQ(String qq) {
-        return userRepo.isExistByUserNo(qq);
+        return userRepo.isExistByQQ(qq);
     }
 }

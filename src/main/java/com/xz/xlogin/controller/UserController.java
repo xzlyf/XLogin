@@ -45,6 +45,9 @@ public class UserController {
                            @RequestParam(value = "type") String type,
                            @RequestParam(value = "t") Long timestamp,
                            @RequestParam(value = "st") String st) {
+
+        //TODO token 分开 多应用独立token
+
         //解密RSA
         String rsaPwd;
         try {
@@ -109,7 +112,6 @@ public class UserController {
         } else {
             return new ApiResult(StatusEnum.ERROR, null, "请稍后重试");
         }
-
     }
 
 }
