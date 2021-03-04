@@ -39,11 +39,11 @@ public class User implements Serializable {
     @JoinColumn(name="detail_id")
     private UserDetail detail;
 
-    @Column(name = "user_no", length = 16, unique = true)
+    @Column(name = "user_no", length = 16, unique = true,nullable = false)
     private String userNo;
 
     @JsonIgnore
-    @Column(name = "user_pwd", length = 32)
+    @Column(name = "user_pwd", length = 32,nullable = false)
     private String userPwd;
 
     @Column(name = "user_phone", length = 16, unique = true)
