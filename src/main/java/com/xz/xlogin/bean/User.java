@@ -52,10 +52,6 @@ public class User implements Serializable {
     private String userEmail;
 
     @JsonIgnore
-    @Column(name = "token", length = 32, unique = true)
-    private String token;
-
-    @JsonIgnore
     @Column(name = "order_qq", length = 128, unique = true)
     private String orderQQ;
 

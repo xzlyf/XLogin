@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -28,10 +29,11 @@ public class UserDetail {
      * 主键自动生成id
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) //sql自动生成策略
-    @JsonIgnore
+    @GenericGenerator(name = "system-uuid", strategy = "uuid") //这个是hibernate的注解/生成32位UUID
+    @GeneratedValue(generator = "system-uuid")
+    @JsonIgnore//作用：在实体类向前台返回数据时用来忽略不想传递给前台的属性或接口。
     @Column(name = "id", length = 32)
-    private Long id;
+    private String id;
 
     @OneToOne(mappedBy="detail")
     private User user;
