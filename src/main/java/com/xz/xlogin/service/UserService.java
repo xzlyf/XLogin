@@ -1,8 +1,8 @@
 package com.xz.xlogin.service;
 
 
-import com.xz.xlogin.pojo.User;
-import com.xz.xlogin.pojo.vo.ApiResult;
+import com.xz.xlogin.bean.User;
+import com.xz.xlogin.bean.vo.ApiResult;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

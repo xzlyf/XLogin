@@ -1,7 +1,7 @@
 package com.xz.xlogin.service;
 
 
-import com.xz.xlogin.pojo.UserDetail;
+import com.xz.xlogin.bean.UserDetail;
 
 /**
  * @Author: xz

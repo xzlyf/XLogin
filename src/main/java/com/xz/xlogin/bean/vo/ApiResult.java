@@ -1,4 +1,4 @@
-package com.xz.xlogin.pojo.vo;
+package com.xz.xlogin.bean.vo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.xz.xlogin.constant.StatusEnum;

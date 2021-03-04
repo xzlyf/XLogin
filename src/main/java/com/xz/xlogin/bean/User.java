@@ -1,4 +1,4 @@
-package com.xz.xlogin.pojo;
+package com.xz.xlogin.bean;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,28 +35,40 @@ public class User implements Serializable {
     @Column(name = "uuid", length = 32)
     private String uuid;
 
-    @Column(name = "user_no", length = 16)
-    private String userNo;
+    @OneToOne(optional=false,cascade=CascadeType.ALL)
+    @JoinColumn(name="detail_id")
+    private UserDetail detail;
 
-    @Column(name = "user_name", length = 32)
-    private String userName;
+    @Column(name = "user_no", length = 16, unique = true)
+    private String userNo;
 
     @JsonIgnore
     @Column(name = "user_pwd", length = 32)
     private String userPwd;
 
-    @Column(name = "user_phone", length = 16)
+    @Column(name = "user_phone", length = 16, unique = true)
     private String userPhone;
 
+    @Column(name = "user_email", length = 320, unique = true)
+    private String userEmail;
+
     @JsonIgnore
-    @Column(name = "token", length = 32)
+    @Column(name = "token", length = 32, unique = true)
     private String token;
 
+    @JsonIgnore
+    @Column(name = "order_qq", length = 128, unique = true)
+    private String orderQQ;
 
-    //User是关系的维护端，当删除 User，会级联删除
-    //@OneToOne(cascade=CascadeType.ALL)
-    //@JoinColumn(name = "detail_id", referencedColumnName = "id")//唯一外键
-    //private UserDetail userDetail;
+    @JsonIgnore
+    @Column(name = "order_wx", length = 128, unique = true)
+    private String orderWx;
+
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @Column(name = "last_login_time")
+    private Date lastLoginTime;
 
     @CreatedDate
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -67,5 +79,4 @@ public class User implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
-
 }

@@ -1,4 +1,4 @@
-package com.xz.xlogin.pojo;
+package com.xz.xlogin.bean;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -33,30 +33,28 @@ public class UserDetail {
     @Column(name = "id", length = 32)
     private Long id;
 
-    @Column(name = "nick_name", length = 32)
-    private String nickName;
+    @OneToOne(mappedBy="detail")
+    private User user;
 
-    @Column(name = "birthday")
-    private Date birthday;
+
+    @Column(name = "avatar", length = 512)
+    private String avatar;
+
+    @Column(name = "nick", length = 32)
+    private String nickName;
 
     @Column(name = "sex", length = 8)
     private String sex;
 
-    @Column(name = "site")
-    private String site;
+    @Column(name = "birthday")
+    private Date birthday;
 
-    @Column(name = "profession", length = 64)
-    private String profession;
+    @Column(name = "slogan", length = 512)
+    private String slogan;
 
-    @Column(name = "company", length = 64)
-    private String company;
+    @Column(name = "city")
+    private String city;
 
-    @Column(name = "description")
-    private String description;
-
-    @JoinColumn(name = "uuid",unique = true) //joinColumn 映射外键列名
-    @OneToOne() //一对一
-    private User user;
 
     @CreatedDate
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -67,6 +65,5 @@ public class UserDetail {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
-
 
 }

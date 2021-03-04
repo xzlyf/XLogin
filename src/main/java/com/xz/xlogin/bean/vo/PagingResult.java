@@ -1,4 +1,4 @@
-package com.xz.xlogin.pojo.vo;
+package com.xz.xlogin.bean.vo;
 
 import com.xz.xlogin.constant.StatusEnum;
 import org.springframework.data.domain.Page;
