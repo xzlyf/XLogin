@@ -13,4 +13,10 @@ public interface UserService {
 
     String isExistByUserNo(String userNo);
 
+    String isExistByPhone(String phone);
+
+    String isExistByEmail(String email);
+
+    String isExistByQQ(String qq);
+
 }

@@ -7,6 +7,7 @@ import com.xz.xlogin.constant.Local;
 import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.service.impl.UserServiceImpl;
 import com.xz.xlogin.utils.AccountGenerate;
+import com.xz.xlogin.utils.DESUtil;
 import com.xz.xlogin.utils.RSAUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Date;
 
 /**
  * @Author: xz
@@ -44,24 +46,33 @@ public class UserController {
                            @RequestParam(value = "t") Long timestamp,
                            @RequestParam(value = "st") String st) {
         //解密RSA
-        //String rsaPwd;
-        //try {
-        //    rsaPwd = RSAUtil.privateDecrypt(password, RSAUtil.getPrivateKey(Local.privateKey));
-        //} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-        //    e.printStackTrace();
-        //    return new ApiResult(StatusEnum.ERROR_SECRET, null);
-        //}
+        String rsaPwd;
+        try {
+            rsaPwd = RSAUtil.privateDecrypt(pwd, RSAUtil.getPrivateKey(Local.privateKey));
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            e.printStackTrace();
+            return new ApiResult(StatusEnum.ERROR_SECRET, null);
+        }
 
         //创建一个新用户对象
         User user = new User();
         switch (type) {
             case "phone":
+                if (userServiceImpl.isExistByPhone(cert) != null) {
+                    return new ApiResult(StatusEnum.FAILED_PHONE_EXIST, null);
+                }
                 user.setUserPhone(cert);
                 break;
             case "email":
+                if (userServiceImpl.isExistByEmail(cert) != null) {
+                    return new ApiResult(StatusEnum.FAILED_EMAIL_EXIST, null);
+                }
                 user.setUserEmail(cert);
                 break;
             case "qq":
+                if (userServiceImpl.isExistByQQ(cert) != null) {
+                    return new ApiResult(StatusEnum.FAILED_QQ_EXIST, null);
+                }
                 user.setOrderQQ(cert);
                 break;
             default:
@@ -71,12 +82,25 @@ public class UserController {
         String userNo;
         do {
             userNo = AccountGenerate.makeAccount(8);
-        } while (userServiceImpl.isExistByUserNo(userNo) == null);
+        } while (userServiceImpl.isExistByUserNo(userNo) != null);
         user.setUserNo(userNo);
-        user.setUserPwd(pwd);
 
+        //将明文密码进行单项加密存入数据库
+        try {
+            user.setUserPwd(DESUtil.encrypt(rsaPwd, Local.secretKey));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResult(StatusEnum.ERROR_PARAMS, "密码不符合规范");
+        }
+
+        //更新时间
+        user.setCreateTime(new Date());
+        user.setUpdateTime(new Date());
         //创建一个用户详情对象
         UserDetail detail = new UserDetail();
+        //更新时间
+        detail.setCreateTime(new Date());
+        detail.setUpdateTime(new Date());
         user.setDetail(detail);
 
         boolean isOk = userServiceImpl.register(user);

@@ -20,7 +20,7 @@ public enum StatusEnum {
     NULL_USER(1045, "用户不存在"),
     FAILED_USER_ADD(1046, "用户创建失败"),
     FAILED_USER_UPDATE(1047, "用户更新失败"),
-    FAILED_USER_EXIST(1048, "手机号已注册"),
+    FAILED_PHONE_EXIST(1048, "手机号已注册"),
     FAILED_USER_LOGIN(1049, "账号或密码错误"),
     FAILED_USER_LOGIN_NO_USER_PHONE(1050, "手机号未注册"),
     FAILED_USER_LOGIN_NO_USER_NO(1051, "账号未注册"),
@@ -29,7 +29,9 @@ public enum StatusEnum {
     FAILED_EVENT_DELETE(1054, "事件删除失败"),
     FAILED_EVENT_NULL(1055, "未找到对应事件"),
     FAILED_EVENT_UPDATE(1056, "更新事件失败"),
-    FAILED_USER_OLDPWD(1057, "旧密码错误");
+    FAILED_USER_OLDPWD(1057, "旧密码错误"),
+    FAILED_EMAIL_EXIST(1058, "邮箱已注册"),
+    FAILED_QQ_EXIST(1059, "QQ已绑定账号");
 
     /**
      * 响应状态码

@@ -30,4 +30,19 @@ public class UserServiceImpl implements UserService {
     public String isExistByUserNo(String userNo) {
         return userRepo.isExistByUserNo(userNo);
     }
+
+    @Override
+    public String isExistByPhone(String phone) {
+        return userRepo.isExistByUserNo(phone);
+    }
+
+    @Override
+    public String isExistByEmail(String email) {
+        return userRepo.isExistByUserNo(email);
+    }
+
+    @Override
+    public String isExistByQQ(String qq) {
+        return userRepo.isExistByUserNo(qq);
+    }
 }
