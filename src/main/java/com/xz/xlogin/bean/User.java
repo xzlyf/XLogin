@@ -36,10 +36,6 @@ public class User implements Serializable {
     @JoinColumn(name = "detail_id")
     private UserDetail detail;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    //@JoinColumn(name = "identity_id")
-    private List<Identity> identities;
-
     @Column(name = "user_no", length = 16, unique = true, nullable = false)
     private String userNo;
 

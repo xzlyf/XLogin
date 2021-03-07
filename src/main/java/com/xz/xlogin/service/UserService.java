@@ -2,6 +2,7 @@ package com.xz.xlogin.service;
 
 
 import com.xz.xlogin.bean.User;
+import com.xz.xlogin.constant.StatusEnum;
 
 /**
  * @Author: xz
@@ -10,6 +11,12 @@ import com.xz.xlogin.bean.User;
 public interface UserService {
 
     boolean register(User user);
+
+    String decodeRSA(String rsaPwd);
+
+    StatusEnum existAccount(String account, String type);
+
+    boolean verifyPwd(String account, String rsaPwd, String type);
 
     String isExistByUserNo(String userNo);
 
