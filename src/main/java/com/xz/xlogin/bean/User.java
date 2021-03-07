@@ -5,14 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 用户实体类
@@ -34,15 +32,19 @@ public class User implements Serializable {
     @Column(name = "uuid", length = 32)
     private String uuid;
 
-    @OneToOne(optional=false,cascade=CascadeType.ALL)
-    @JoinColumn(name="detail_id")
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "detail_id")
     private UserDetail detail;
 
-    @Column(name = "user_no", length = 16, unique = true,nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    //@JoinColumn(name = "identity_id")
+    private List<Identity> identities;
+
+    @Column(name = "user_no", length = 16, unique = true, nullable = false)
     private String userNo;
 
     @JsonIgnore
-    @Column(name = "user_pwd", length = 32,nullable = false)
+    @Column(name = "user_pwd", length = 32, nullable = false)
     private String userPwd;
 
     @Column(name = "user_phone", length = 16, unique = true)
