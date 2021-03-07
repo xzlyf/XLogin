@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
      * @return 不等于空表示该账号类型存在  等于空是未注册
      */
     @Override
-    public StatusEnum existAccount(String account, String type) {
+    public StatusEnum existCert(String account, String type) {
         switch (type) {
             case "phone":
                 if (isExistByPhone(account) != null) {
@@ -90,22 +90,25 @@ public class UserServiceImpl implements UserService {
     /**
      * 校验密码
      *
-     * @param cert   账号
-     * @param rsaPwd 密码密文
-     * @param type   登录类型
+     * @param cert 账号
+     * @param tPwd 密码密文
+     * @param type 登录类型
      * @return
      */
     @Override
-    public boolean verifyPwd(String cert, String rsaPwd, String type) {
+    public User verifyPwd(String cert, String tPwd, String type) {
         switch (type) {
+            case "account":
+                return userRepo.findByUserNoAndUserPwd(cert, tPwd);
             case "phone":
-                break;
+                return userRepo.findByUserPhoneAndUserPwd(cert, tPwd);
             case "email":
-                break;
+                return userRepo.findByUserEmailAndUserPwd(cert, tPwd);
             case "qq":
-                break;
+                return userRepo.findByOrderQQ(tPwd);
+            default:
+                return null;
         }
-        return false;
     }
 
     /**

@@ -14,9 +14,9 @@ public interface UserService {
 
     String decodeRSA(String rsaPwd);
 
-    StatusEnum existAccount(String account, String type);
+    StatusEnum existCert(String account, String type);
 
-    boolean verifyPwd(String account, String rsaPwd, String type);
+    User verifyPwd(String account, String tPwd, String type);
 
     String isExistByUserNo(String userNo);
 

@@ -8,15 +8,12 @@ import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.service.impl.UserServiceImpl;
 import com.xz.xlogin.utils.AccountGenerate;
 import com.xz.xlogin.utils.DESUtil;
-import com.xz.xlogin.utils.RSAUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 
 /**
@@ -30,7 +27,7 @@ public class UserController {
     private UserServiceImpl userServiceImpl;
 
     /**
-     * 登录
+     * 注册接口
      *
      * @param pwd       rsa加密密码
      * @param cert      注册账号
@@ -46,16 +43,16 @@ public class UserController {
                            @RequestParam(value = "t") Long timestamp,
                            @RequestParam(value = "st") String st) {
 
+        //判断账号是否已注册
+        StatusEnum statusEnum = userServiceImpl.existCert(cert, type);
+        if (statusEnum != null) {
+            return new ApiResult(statusEnum, null);
+        }
+
         //解密RSA
         String tPwd = userServiceImpl.decodeRSA(pwd);
         if (tPwd == null) {
             return new ApiResult(StatusEnum.ERROR_SECRET, null);
-        }
-
-        //判断账号是否已注册
-        StatusEnum statusEnum = userServiceImpl.existAccount(cert, type);
-        if (statusEnum != null) {
-            return new ApiResult(statusEnum, null);
         }
 
         //创建一个新用户对象
@@ -104,18 +101,39 @@ public class UserController {
         }
     }
 
+    /**
+     * 登录接口
+     *
+     * @param cert      账号
+     * @param pwd       密码密文
+     * @param type      账号类型 phone-手机 email-邮箱 qq-qq接入 account-账号
+     * @param timestamp 时间戳
+     * @param st        随机字符串
+     * @return
+     */
     @PostMapping("/login")
-    public Object login(@RequestParam(value = "account") String account,
+    public Object login(@RequestParam(value = "cert") String cert,
                         @RequestParam(value = "pwd") String pwd,
                         @RequestParam(value = "type") String type,
-                        @RequestParam(value = "t") Long timestamp2,
+                        @RequestParam(value = "t") Long timestamp,
                         @RequestParam(value = "st") String st) {
+
+        //判断账号是否已注册
+        StatusEnum statusEnum = userServiceImpl.existCert(cert, type);
+        if (statusEnum != null) {
+            return new ApiResult(statusEnum, null);
+        }
         //解密RSA
         String tPwd = userServiceImpl.decodeRSA(pwd);
         if (tPwd == null) {
             return new ApiResult(StatusEnum.ERROR_SECRET, null);
         }
 
+        //获取账号对象
+        User user = userServiceImpl.verifyPwd(cert, tPwd, type);
+        if (user == null) {
+            return new ApiResult(StatusEnum.FAILED_USER_LOGIN, null);
+        }
 
         return null;
     }

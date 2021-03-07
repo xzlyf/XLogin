@@ -32,4 +32,12 @@ public interface UserRepo extends JpaRepository<User, Long> {
      */
     @Query("select u.orderQQ from User u where u.orderQQ = ?1")
     String isExistByQQ(String qq);
+
+    User findByUserNoAndUserPwd(String userNo, String userPwd);
+
+    User findByUserPhoneAndUserPwd(String userPhone, String userPwd);
+
+    User findByUserEmailAndUserPwd(String userEmail, String userPwd);
+
+    User findByOrderQQ(String qqSecret);
 }
