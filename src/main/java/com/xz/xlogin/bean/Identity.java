@@ -27,10 +27,6 @@ public class Identity {
     @OneToOne(cascade = CascadeType.ALL)
     private User user;
 
-
-    @Column(name = "app_id", unique = true, nullable = false)
-    private String appId;
-
     @Column(name = "token", unique = true)
     private String token;
 
