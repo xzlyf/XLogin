@@ -1,13 +1,19 @@
 package com.xz.xlogin.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.xz.xlogin.bean.App;
 import com.xz.xlogin.bean.User;
 import com.xz.xlogin.constant.Local;
 import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.repository.UserRepo;
 import com.xz.xlogin.service.UserService;
 import com.xz.xlogin.utils.RSAUtil;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -96,7 +102,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public User verifyPwd(String cert, String tPwd, String type) {
+    public User verifyByPwd(String cert, String tPwd, String type) {
         switch (type) {
             case "account":
                 return userRepo.findByUserNoAndUserPwd(cert, tPwd);
@@ -109,6 +115,21 @@ public class UserServiceImpl implements UserService {
             default:
                 return null;
         }
+    }
+
+    /**
+     * 验证appId合法性
+     *
+     * @param appId 待验证appId
+     * @return
+     */
+    @Override
+    public boolean verifyByAppId(@NonNull String appId) {
+
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "localhost:8080/app/checkAppId?id=" + appId;
+        String response = restTemplate.getForObject(url, String.class);
+        return JSON.parseObject(response).getBoolean("data");
     }
 
     /**

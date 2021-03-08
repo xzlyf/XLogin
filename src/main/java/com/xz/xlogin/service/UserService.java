@@ -1,6 +1,7 @@
 package com.xz.xlogin.service;
 
 
+import com.xz.xlogin.bean.App;
 import com.xz.xlogin.bean.User;
 import com.xz.xlogin.constant.StatusEnum;
 
@@ -16,7 +17,9 @@ public interface UserService {
 
     StatusEnum existCert(String account, String type);
 
-    User verifyPwd(String account, String tPwd, String type);
+    User verifyByPwd(String account, String tPwd, String type);
+
+    boolean verifyByAppId(String appId);
 
     String isExistByUserNo(String userNo);
 

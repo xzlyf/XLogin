@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @Date: 2021/3/4
  */
 public interface AppRepo extends JpaRepository<App, Long> {
-
+    App findByAppId(String appId);
 }

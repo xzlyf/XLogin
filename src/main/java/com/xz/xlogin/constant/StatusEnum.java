@@ -11,7 +11,7 @@ public enum StatusEnum {
     ERROR_TIMESTAMP(6, "时间未与服务器同步"),
     ERROR_TIMESTAMP_RECEIVE(7, "时间戳不合法"),
     ERROR_APPID_NULL(8, "缺失AppId参数"),
-    ERROR_APPID_NOTFALL(9, "AppId不存在"),
+    ERROR_APPID_NOTFALL(9, "非法AppId"),
     ERROR_SECRET(10, "密钥无效"),
     ERROR_PARAMS(11, "参数错误"),
     FAILED_NULL_PARAMS(12, "缺失重要参数"),
@@ -31,7 +31,10 @@ public enum StatusEnum {
     FAILED_EVENT_UPDATE(1056, "更新事件失败"),
     FAILED_USER_OLDPWD(1057, "旧密码错误"),
     FAILED_EMAIL_EXIST(1058, "邮箱已注册"),
-    FAILED_QQ_EXIST(1059, "QQ已绑定账号");
+    FAILED_QQ_EXIST(1059, "QQ已绑定账号"),
+    FAILED_USER_LOGIN_NO_USER_QQ(1060, "qq未绑定账号"),
+    FAILED_USER_LOGIN_NO_USER_EMAIL(1061, "邮箱未注册"),
+    FAILED_USER_LOGIN_NO_USER_ACCOUNT(1062, "账号未注册");
 
     /**
      * 响应状态码

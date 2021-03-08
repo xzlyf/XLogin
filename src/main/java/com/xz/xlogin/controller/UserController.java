@@ -9,10 +9,7 @@ import com.xz.xlogin.service.impl.UserServiceImpl;
 import com.xz.xlogin.utils.AccountGenerate;
 import com.xz.xlogin.utils.DESUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 
@@ -112,7 +109,8 @@ public class UserController {
      * @return
      */
     @PostMapping("/login")
-    public Object login(@RequestParam(value = "cert") String cert,
+    public Object login(@RequestHeader(value = "appid") String appId,
+                        @RequestParam(value = "cert") String cert,
                         @RequestParam(value = "pwd") String pwd,
                         @RequestParam(value = "type") String type,
                         @RequestParam(value = "t") Long timestamp,
@@ -120,7 +118,7 @@ public class UserController {
 
         //判断账号是否已注册
         StatusEnum statusEnum = userServiceImpl.existCert(cert, type);
-        if (statusEnum != null) {
+        if (statusEnum == null) {
             return new ApiResult(statusEnum, null);
         }
         //解密RSA
@@ -130,10 +128,17 @@ public class UserController {
         }
 
         //获取账号对象
-        User user = userServiceImpl.verifyPwd(cert, tPwd, type);
+        User user = userServiceImpl.verifyByPwd(cert, tPwd, type);
         if (user == null) {
             return new ApiResult(StatusEnum.FAILED_USER_LOGIN, null);
         }
+
+        //验证appId
+        boolean isOk = userServiceImpl.verifyByAppId(appId);
+        if (!isOk) {
+            return new ApiResult(StatusEnum.ERROR_APPID_NOTFALL, null);
+        }
+
 
         return null;
     }
