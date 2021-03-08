@@ -3,6 +3,7 @@ package com.xz.xlogin.service;
 
 import com.xz.xlogin.bean.App;
 import com.xz.xlogin.bean.User;
+import com.xz.xlogin.bean.entity.AccountMark;
 import com.xz.xlogin.constant.StatusEnum;
 
 /**
@@ -15,7 +16,7 @@ public interface UserService {
 
     String decodeRSA(String rsaPwd);
 
-    StatusEnum existCert(String account, String type);
+    AccountMark existCert(String account, String type);
 
     User verifyByPwd(String account, String tPwd, String type);
 

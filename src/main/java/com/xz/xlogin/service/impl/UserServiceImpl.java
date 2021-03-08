@@ -1,17 +1,16 @@
 package com.xz.xlogin.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.xz.xlogin.bean.App;
 import com.xz.xlogin.bean.User;
+import com.xz.xlogin.bean.entity.AccountMark;
 import com.xz.xlogin.constant.Local;
 import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.repository.UserRepo;
 import com.xz.xlogin.service.UserService;
+import com.xz.xlogin.utils.DESUtil;
 import com.xz.xlogin.utils.RSAUtil;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -70,27 +69,41 @@ public class UserServiceImpl implements UserService {
      * @return 不等于空表示该账号类型存在  等于空是未注册
      */
     @Override
-    public StatusEnum existCert(String account, String type) {
+    public AccountMark existCert(String account, String type) {
+        AccountMark mark = new AccountMark();
         switch (type) {
             case "phone":
                 if (isExistByPhone(account) != null) {
-                    return StatusEnum.FAILED_PHONE_EXIST;
+                    mark.setExist(true);
+                    mark.setStatusCode(StatusEnum.STATUS_681.getCode());
+                } else {
+                    mark.setExist(false);
+                    mark.setStatusCode(StatusEnum.STATUS_692.getCode());
                 }
                 break;
             case "email":
                 if (isExistByEmail(account) != null) {
-                    return StatusEnum.FAILED_EMAIL_EXIST;
+                    mark.setExist(true);
+                    mark.setStatusCode(StatusEnum.STATUS_682.getCode());
+                } else {
+                    mark.setExist(false);
+                    mark.setStatusCode(StatusEnum.STATUS_691.getCode());
                 }
                 break;
             case "qq":
                 if (isExistByQQ(account) != null) {
-                    return StatusEnum.FAILED_QQ_EXIST;
+                    mark.setExist(true);
+                    mark.setStatusCode(StatusEnum.STATUS_683.getCode());
+                } else {
+                    mark.setExist(false);
+                    mark.setStatusCode(StatusEnum.STATUS_690.getCode());
                 }
-                break;
             default:
-                return StatusEnum.ERROR_PARAMS;
+                mark.setExist(false);
+                mark.setStatusCode(StatusEnum.STATUS_400.getCode());
+                break;
         }
-        return null;
+        return mark;
     }
 
     /**
@@ -103,13 +116,21 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User verifyByPwd(String cert, String tPwd, String type) {
+        String desPwd;
+        //将明文密码进行单项加密存入数据库
+        try {
+            desPwd = DESUtil.encrypt(tPwd, Local.secretKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
         switch (type) {
             case "account":
-                return userRepo.findByUserNoAndUserPwd(cert, tPwd);
+                return userRepo.findByUserNoAndUserPwd(cert, desPwd);
             case "phone":
-                return userRepo.findByUserPhoneAndUserPwd(cert, tPwd);
+                return userRepo.findByUserPhoneAndUserPwd(cert, desPwd);
             case "email":
-                return userRepo.findByUserEmailAndUserPwd(cert, tPwd);
+                return userRepo.findByUserEmailAndUserPwd(cert, desPwd);
             case "qq":
                 return userRepo.findByOrderQQ(tPwd);
             default:
@@ -127,8 +148,11 @@ public class UserServiceImpl implements UserService {
     public boolean verifyByAppId(@NonNull String appId) {
 
         RestTemplate restTemplate = new RestTemplate();
-        String url = "localhost:8080/app/checkAppId?id=" + appId;
+        String url = "http://localhost:8080/app/checkAppId?id=" + appId;
         String response = restTemplate.getForObject(url, String.class);
+        System.out.println("===========");
+        System.out.println("appId:"+appId);
+        System.out.println(response);
         return JSON.parseObject(response).getBoolean("data");
     }
 

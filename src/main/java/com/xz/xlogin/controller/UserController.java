@@ -2,6 +2,7 @@ package com.xz.xlogin.controller;
 
 import com.xz.xlogin.bean.User;
 import com.xz.xlogin.bean.UserDetail;
+import com.xz.xlogin.bean.entity.AccountMark;
 import com.xz.xlogin.bean.vo.ApiResult;
 import com.xz.xlogin.constant.Local;
 import com.xz.xlogin.constant.StatusEnum;
@@ -41,15 +42,15 @@ public class UserController {
                            @RequestParam(value = "st") String st) {
 
         //判断账号是否已注册
-        StatusEnum statusEnum = userServiceImpl.existCert(cert, type);
-        if (statusEnum != null) {
-            return new ApiResult(statusEnum, null);
+        AccountMark mark = userServiceImpl.existCert(cert, type);
+        if (mark.isExist()) {
+            return new ApiResult(StatusEnum.getEnum(mark.getStatusCode()), null);
         }
 
         //解密RSA
         String tPwd = userServiceImpl.decodeRSA(pwd);
         if (tPwd == null) {
-            return new ApiResult(StatusEnum.ERROR_SECRET, null);
+            return new ApiResult(StatusEnum.STATUS_307, null);
         }
 
         //创建一个新用户对象
@@ -77,7 +78,7 @@ public class UserController {
             user.setUserPwd(DESUtil.encrypt(tPwd, Local.secretKey));
         } catch (Exception e) {
             e.printStackTrace();
-            return new ApiResult(StatusEnum.ERROR_PARAMS, "密码不符合规范");
+            return new ApiResult(StatusEnum.STATUS_400, "密码不符合规范");
         }
 
         //更新时间
@@ -117,26 +118,27 @@ public class UserController {
                         @RequestParam(value = "st") String st) {
 
         //判断账号是否已注册
-        StatusEnum statusEnum = userServiceImpl.existCert(cert, type);
-        if (statusEnum == null) {
-            return new ApiResult(statusEnum, null);
+        AccountMark mark = userServiceImpl.existCert(cert, type);
+        if (!mark.isExist()) {
+            return new ApiResult(StatusEnum.getEnum(mark.getStatusCode()), null);
         }
         //解密RSA
         String tPwd = userServiceImpl.decodeRSA(pwd);
         if (tPwd == null) {
-            return new ApiResult(StatusEnum.ERROR_SECRET, null);
+            return new ApiResult(StatusEnum.STATUS_307, null);
         }
 
         //获取账号对象
         User user = userServiceImpl.verifyByPwd(cert, tPwd, type);
         if (user == null) {
-            return new ApiResult(StatusEnum.FAILED_USER_LOGIN, null);
+            return new ApiResult(StatusEnum.STATUS_601, null);
         }
 
+        //todo 验证这步待完成
         //验证appId
         boolean isOk = userServiceImpl.verifyByAppId(appId);
         if (!isOk) {
-            return new ApiResult(StatusEnum.ERROR_APPID_NOTFALL, null);
+            return new ApiResult(StatusEnum.STATUS_306, null);
         }
 
 
