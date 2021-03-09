@@ -20,8 +20,6 @@ public interface UserService {
 
     User verifyByPwd(String account, String tPwd, String type);
 
-    boolean verifyByAppId(String appId);
-
     String isExistByUserNo(String userNo);
 
     String isExistByPhone(String phone);

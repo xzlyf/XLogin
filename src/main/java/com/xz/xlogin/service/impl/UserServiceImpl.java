@@ -139,24 +139,6 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 验证appId合法性
-     *
-     * @param appId 待验证appId
-     * @return
-     */
-    @Override
-    public boolean verifyByAppId(@NonNull String appId) {
-
-        RestTemplate restTemplate = new RestTemplate();
-        String url = "http://localhost:8080/app/checkAppId?id=" + appId;
-        String response = restTemplate.getForObject(url, String.class);
-        System.out.println("===========");
-        System.out.println("appId:"+appId);
-        System.out.println(response);
-        return JSON.parseObject(response).getBoolean("data");
-    }
-
-    /**
      * 账号是否存在
      *
      * @param userNo 账号

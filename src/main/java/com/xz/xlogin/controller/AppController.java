@@ -23,8 +23,7 @@ public class AppController {
     AppServiceImpl appServiceImpl;
 
     @GetMapping("/checkAppId")
-    public Object verifyAppId(HttpServletRequest request) {
-        String appId = request.getParameter("appId");
+    public Object verifyAppId(String appId) {
         if (appId == null)
             return null;
         return new ApiResult(StatusEnum.SUCCESS, appServiceImpl.verifyByAppId(appId));

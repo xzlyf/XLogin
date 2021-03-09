@@ -6,12 +6,16 @@ import com.xz.xlogin.bean.entity.AccountMark;
 import com.xz.xlogin.bean.vo.ApiResult;
 import com.xz.xlogin.constant.Local;
 import com.xz.xlogin.constant.StatusEnum;
+import com.xz.xlogin.repository.AppRepo;
+import com.xz.xlogin.service.impl.AppServiceImpl;
 import com.xz.xlogin.service.impl.UserServiceImpl;
 import com.xz.xlogin.utils.AccountGenerate;
 import com.xz.xlogin.utils.DESUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 /**
@@ -22,7 +26,10 @@ import java.util.Date;
 @RequestMapping("/user")
 public class UserController {
     @Autowired
-    private UserServiceImpl userServiceImpl;
+    UserServiceImpl userServiceImpl;
+    @Autowired
+    AppServiceImpl appServiceImpl;
+    //AppController appController;
 
     /**
      * 注册接口
@@ -115,7 +122,9 @@ public class UserController {
                         @RequestParam(value = "pwd") String pwd,
                         @RequestParam(value = "type") String type,
                         @RequestParam(value = "t") Long timestamp,
-                        @RequestParam(value = "st") String st) {
+                        @RequestParam(value = "st") String st,
+                        HttpServletResponse response,
+                        HttpServletRequest request) {
 
         //判断账号是否已注册
         AccountMark mark = userServiceImpl.existCert(cert, type);
@@ -134,12 +143,14 @@ public class UserController {
             return new ApiResult(StatusEnum.STATUS_601, null);
         }
 
-        //todo 验证这步待完成
-        //验证appId
-        boolean isOk = userServiceImpl.verifyByAppId(appId);
+        //验证appId ----访问AppController的接口
+        boolean isOk = appServiceImpl.verifyByAppId(appId);
+        System.out.println("==================");
+        System.out.println(isOk);
         if (!isOk) {
             return new ApiResult(StatusEnum.STATUS_306, null);
         }
+
 
 
         return null;

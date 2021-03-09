@@ -16,6 +16,12 @@ public class AppServiceImpl implements AppService {
     @Autowired
     AppRepo appRepo;
 
+    /**
+     * 验证appId合法性
+     *
+     * @param appId 待校验的appId
+     * @return true 正常 false不存在或异常
+     */
     @Override
     public boolean verifyByAppId(@NonNull String appId) {
         App app = appRepo.findByAppId(appId);
