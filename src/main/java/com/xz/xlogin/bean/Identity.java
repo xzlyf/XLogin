@@ -27,6 +27,9 @@ public class Identity {
     @OneToOne(cascade = CascadeType.ALL)
     private User user;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private App app;
+
     @Column(name = "token", unique = true)
     private String token;
 

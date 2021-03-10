@@ -13,5 +13,5 @@ public interface AppService {
      * @param appId 待校验的appId
      * @return true  合法  False 不存在
      */
-    boolean verifyByAppId(String appId);
+    App verifyByAppId(String appId);
 }

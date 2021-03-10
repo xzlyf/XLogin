@@ -5,6 +5,7 @@ import com.xz.xlogin.repository.AppRepo;
 import com.xz.xlogin.service.AppService;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,12 +21,10 @@ public class AppServiceImpl implements AppService {
      * 验证appId合法性
      *
      * @param appId 待校验的appId
-     * @return true 正常 false不存在或异常
      */
     @Override
-    public boolean verifyByAppId(@NonNull String appId) {
-        App app = appRepo.findByAppId(appId);
-        return app != null;
+    public App verifyByAppId(@NonNull String appId) {
+        return appRepo.findByAppId(appId);
     }
 }
 

@@ -19,7 +19,7 @@ public class App {
     @GeneratedValue
     private Long id;
 
-    @Column(name = "app_id")
+    @Column(name = "app_id",unique = true)
     private String appId;
 
     @Column(name = "app_name")

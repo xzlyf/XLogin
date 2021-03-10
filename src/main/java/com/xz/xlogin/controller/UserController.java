@@ -1,13 +1,14 @@
 package com.xz.xlogin.controller;
 
+import com.xz.xlogin.bean.App;
 import com.xz.xlogin.bean.User;
 import com.xz.xlogin.bean.UserDetail;
 import com.xz.xlogin.bean.entity.AccountMark;
 import com.xz.xlogin.bean.vo.ApiResult;
 import com.xz.xlogin.constant.Local;
 import com.xz.xlogin.constant.StatusEnum;
-import com.xz.xlogin.repository.AppRepo;
 import com.xz.xlogin.service.impl.AppServiceImpl;
+import com.xz.xlogin.service.impl.IdentityServiceImpl;
 import com.xz.xlogin.service.impl.UserServiceImpl;
 import com.xz.xlogin.utils.AccountGenerate;
 import com.xz.xlogin.utils.DESUtil;
@@ -29,7 +30,8 @@ public class UserController {
     UserServiceImpl userServiceImpl;
     @Autowired
     AppServiceImpl appServiceImpl;
-    //AppController appController;
+    @Autowired
+    IdentityServiceImpl identityServiceImpl;
 
     /**
      * 注册接口
@@ -144,16 +146,18 @@ public class UserController {
         }
 
         //验证appId ----访问AppController的接口
-        boolean isOk = appServiceImpl.verifyByAppId(appId);
-        System.out.println("==================");
-        System.out.println(isOk);
-        if (!isOk) {
+        App app = appServiceImpl.verifyByAppId(appId);
+        if (app == null) {
             return new ApiResult(StatusEnum.STATUS_306, null);
         }
 
+        //生成新令牌
+        String token = identityServiceImpl.makeToken(app, user,tPwd);
+        if (token == null) {
+            return new ApiResult(StatusEnum.STATUS_102, null);
+        }
 
-
-        return null;
+        return new ApiResult(StatusEnum.SUCCESS, token);
     }
 
 }
