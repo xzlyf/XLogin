@@ -43,4 +43,10 @@ public class IdentityServiceImpl implements IdentityService {
         }
         return token;
     }
+
+    @Override
+    public Identity verifyToken(App app, User user, String token) {
+        return identityRepo.findByAppAndUserAndToken(app, user, token);
+    }
+
 }

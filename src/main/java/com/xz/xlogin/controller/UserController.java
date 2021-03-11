@@ -1,6 +1,7 @@
 package com.xz.xlogin.controller;
 
 import com.xz.xlogin.bean.App;
+import com.xz.xlogin.bean.Identity;
 import com.xz.xlogin.bean.User;
 import com.xz.xlogin.bean.UserDetail;
 import com.xz.xlogin.bean.entity.AccountMark;
@@ -138,22 +139,25 @@ public class UserController {
         if (tPwd == null) {
             return new ApiResult(StatusEnum.STATUS_307, null);
         }
-
-        //获取账号对象
-        User user = userServiceImpl.verifyByPwd(cert, tPwd, type);
-        if (user == null) {
-            if (type.equals("token")) {
-                //token登录操作
-            } else {
-                return new ApiResult(StatusEnum.STATUS_601, null);
-            }
-        }
-
         //验证appId ----访问AppController的接口
         App app = appServiceImpl.verifyByAppId(appId);
         if (app == null) {
             return new ApiResult(StatusEnum.STATUS_306, null);
         }
+        //获取账号对象
+        User user = userServiceImpl.verifyByPwd(cert, tPwd, type);
+        if (user == null) {
+            return new ApiResult(StatusEnum.STATUS_601, null);
+        }
+        //如果登录类型为token
+        if (type.equals("token")) {
+            //token登录操作
+            Identity identity = identityServiceImpl.verifyToken(app, user, tPwd);
+            if (identity == null) {
+                return new ApiResult(StatusEnum.STATUS_600, null);
+            }
+        }
+
 
         //生成新令牌
         String token = identityServiceImpl.makeToken(app, user, tPwd);

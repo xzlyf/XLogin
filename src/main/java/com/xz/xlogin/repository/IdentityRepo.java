@@ -16,6 +16,8 @@ public interface IdentityRepo extends JpaRepository<Identity, Long> {
 
     Identity findByAppAndUser(App app, User user);
 
+    Identity findByAppAndUserAndToken(App app, User user, String token);
+
     @Transactional
     @Modifying
     @Query("update Identity identity set identity.token =?1 where identity.app=?2 and identity.user=?3")

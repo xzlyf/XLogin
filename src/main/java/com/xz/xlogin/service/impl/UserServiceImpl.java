@@ -133,6 +133,8 @@ public class UserServiceImpl implements UserService {
                 return userRepo.findByUserEmailAndUserPwd(cert, desPwd);
             case "qq":
                 return userRepo.findByOrderQQ(tPwd);
+            case "token":
+                return userRepo.findByUserNo(cert);
             default:
                 return null;
         }

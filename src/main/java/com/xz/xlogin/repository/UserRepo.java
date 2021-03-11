@@ -41,5 +41,9 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
     User findByOrderQQ(String qqSecret);
 
+    User findByUserPhone(String phone);
+
+    User findByUserNo(String userNO);
+
 
 }
