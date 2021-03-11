@@ -113,7 +113,7 @@ public class UserController {
      *
      * @param cert      账号
      * @param pwd       密码密文
-     * @param type      账号类型 phone-手机 email-邮箱 qq-qq接入 account-账号
+     * @param type      账号类型 phone-手机 email-邮箱 qq-qq接入 account-账号  token-快速登录
      * @param timestamp 时间戳
      * @param st        随机字符串
      * @return
@@ -142,7 +142,11 @@ public class UserController {
         //获取账号对象
         User user = userServiceImpl.verifyByPwd(cert, tPwd, type);
         if (user == null) {
-            return new ApiResult(StatusEnum.STATUS_601, null);
+            if (type.equals("token")) {
+                //token登录操作
+            } else {
+                return new ApiResult(StatusEnum.STATUS_601, null);
+            }
         }
 
         //验证appId ----访问AppController的接口
@@ -152,7 +156,7 @@ public class UserController {
         }
 
         //生成新令牌
-        String token = identityServiceImpl.makeToken(app, user,tPwd);
+        String token = identityServiceImpl.makeToken(app, user, tPwd);
         if (token == null) {
             return new ApiResult(StatusEnum.STATUS_102, null);
         }

@@ -40,4 +40,6 @@ public interface UserRepo extends JpaRepository<User, Long> {
     User findByUserEmailAndUserPwd(String userEmail, String userPwd);
 
     User findByOrderQQ(String qqSecret);
+
+
 }
