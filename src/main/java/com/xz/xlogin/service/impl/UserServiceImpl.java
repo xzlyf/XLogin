@@ -98,6 +98,11 @@ public class UserServiceImpl implements UserService {
                     mark.setExist(false);
                     mark.setStatusCode(StatusEnum.STATUS_690.getCode());
                 }
+                break;
+            case "token":
+                mark.setExist(true);
+                mark.setStatusCode(StatusEnum.STATUS_606.getCode());
+                break;
             default:
                 mark.setExist(false);
                 mark.setStatusCode(StatusEnum.STATUS_400.getCode());
@@ -134,7 +139,12 @@ public class UserServiceImpl implements UserService {
             case "qq":
                 return userRepo.findByOrderQQ(tPwd);
             case "token":
-                return userRepo.findByUserNo(cert);
+                //手机号或账号都可登录
+                User user = userRepo.findByUserNo(cert);
+                if (user == null) {
+                    user = userRepo.findByUserPhone(cert);
+                }
+                return user;
             default:
                 return null;
         }

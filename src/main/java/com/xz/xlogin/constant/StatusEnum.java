@@ -27,6 +27,7 @@ public enum StatusEnum {
     STATUS_603(603, "用户信息更新失败"),
     STATUS_604(604, "用户创建失败"),
     STATUS_605(605, "用户更新失败"),
+    STATUS_606(606, "token登录"),
     STATUS_680(680, "旧密码错误"),
     STATUS_681(681, "手机号已注册"),
     STATUS_682(682, "邮箱已注册"),
