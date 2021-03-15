@@ -22,4 +22,5 @@ public interface IdentityRepo extends JpaRepository<Identity, Long> {
     @Modifying
     @Query("update Identity identity set identity.token =?1 where identity.app=?2 and identity.user=?3")
     int updateToken(String token, App app, User user);
+
 }

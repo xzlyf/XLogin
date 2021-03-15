@@ -7,7 +7,9 @@ import com.xz.xlogin.repository.IdentityRepo;
 import com.xz.xlogin.service.IdentityService;
 import com.xz.xlogin.utils.MD5Util;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -48,5 +50,13 @@ public class IdentityServiceImpl implements IdentityService {
     public Identity verifyToken(App app, User user, String token) {
         return identityRepo.findByAppAndUserAndToken(app, user, token);
     }
+
+    @Modifying
+    @Transactional
+    @Override
+    public void deleteToken(Identity identity) {
+        identityRepo.delete(identity);
+    }
+
 
 }

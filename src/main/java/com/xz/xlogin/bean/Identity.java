@@ -24,10 +24,10 @@ public class Identity {
     @Column(name = "id", length = 32)
     private String id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     private User user;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     private App app;
 
     @Column(name = "token", unique = true)

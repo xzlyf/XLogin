@@ -37,6 +37,7 @@ public class UserController {
     /**
      * 注册接口
      *
+     * @param appId     appId
      * @param pwd       rsa加密密码
      * @param cert      注册账号
      * @param type      账号类型 phone-手机 email-邮箱 qq-qq接入
@@ -45,7 +46,8 @@ public class UserController {
      * @return
      */
     @PostMapping("/register")
-    public Object register(@RequestParam(value = "pwd") String pwd,
+    public Object register(@RequestHeader(value = "appId") String appId,
+                           @RequestParam(value = "pwd") String pwd,
                            @RequestParam(value = "cert") String cert,
                            @RequestParam(value = "type") String type,
                            @RequestParam(value = "t") Long timestamp,
@@ -56,7 +58,11 @@ public class UserController {
         if (mark.isExist()) {
             return new ApiResult(StatusEnum.getEnum(mark.getStatusCode()), null);
         }
-
+        //验证appId ----访问AppController的接口
+        App app = appServiceImpl.verifyByAppId(appId);
+        if (app == null) {
+            return new ApiResult(StatusEnum.STATUS_306, null);
+        }
         //解密RSA
         String tPwd = userServiceImpl.decodeRSA(pwd);
         if (tPwd == null) {
@@ -111,6 +117,7 @@ public class UserController {
 
     /**
      * 登录接口
+     * token登录均可使用账号或手机号
      *
      * @param cert      账号
      * @param pwd       密码密文
@@ -134,15 +141,15 @@ public class UserController {
         if (!mark.isExist()) {
             return new ApiResult(StatusEnum.getEnum(mark.getStatusCode()), null);
         }
-        //解密RSA
-        String tPwd = userServiceImpl.decodeRSA(pwd);
-        if (tPwd == null) {
-            return new ApiResult(StatusEnum.STATUS_307, null);
-        }
         //验证appId ----访问AppController的接口
         App app = appServiceImpl.verifyByAppId(appId);
         if (app == null) {
             return new ApiResult(StatusEnum.STATUS_306, null);
+        }
+        //解密RSA
+        String tPwd = userServiceImpl.decodeRSA(pwd);
+        if (tPwd == null) {
+            return new ApiResult(StatusEnum.STATUS_307, null);
         }
         //获取账号对象
         User user = userServiceImpl.verifyByPwd(cert, tPwd, type);
@@ -165,6 +172,30 @@ public class UserController {
         }
 
         return new ApiResult(StatusEnum.SUCCESS, token);
+    }
+
+    @GetMapping("/logout")
+    public Object logout(@RequestHeader String appId,
+                         @RequestParam String cert,
+                         @RequestParam String token) {
+
+        //验证appId ----访问AppController的接口
+        App app = appServiceImpl.verifyByAppId(appId);
+        if (app == null) {
+            return new ApiResult(StatusEnum.STATUS_306, null);
+        }
+        //获取账号对象
+        User user = userServiceImpl.verifyByPwd(cert, token, "token");
+        if (user == null) {
+            return new ApiResult(StatusEnum.STATUS_601, null);
+        }
+        //验证token
+        Identity identity = identityServiceImpl.verifyToken(app, user, token);
+        if (identity == null) {
+            return new ApiResult(StatusEnum.STATUS_600, null);
+        }
+        identityServiceImpl.deleteToken(identity);
+        return new ApiResult(StatusEnum.SUCCESS, null);
     }
 
 }

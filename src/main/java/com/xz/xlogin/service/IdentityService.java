@@ -18,4 +18,9 @@ public interface IdentityService {
      * 校验token
      */
     Identity verifyToken(App app, User user, String token);
+
+    /**
+     * 删除token
+     */
+    void deleteToken(Identity identity);
 }
