@@ -158,7 +158,6 @@ public class UserController {
             }
         }
 
-
         //生成新令牌
         String token = identityServiceImpl.makeToken(app, user, tPwd);
         if (token == null) {
