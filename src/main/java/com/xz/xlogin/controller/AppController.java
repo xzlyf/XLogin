@@ -41,6 +41,8 @@ public class AppController {
 
     @RequestMapping("/verifyImage")
     public void createImg(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpSession session = request.getSession();
+        System.out.println("获取图片验证码session:" + session.getId() + "==是否新的:" + session.isNew());
         try {
             response.setContentType("image/jpeg");//设置相应类型,告诉浏览器输出的内容为图片
             response.setHeader("Pragma", "No-cache");//设置响应头信息，告诉浏览器不要缓存此内容
@@ -59,6 +61,7 @@ public class AppController {
                              HttpServletRequest request,
                              HttpServletResponse response) {
         HttpSession session = request.getSession();
+        System.out.println("验证验证码session:" + session.getId() + "==是否新的:" + session.isNew());
         //获取保存在会话中的正确验证码
         String validityCode = (String) session.getAttribute(VerifyCodeUtil.RANDOMCODEKEY);
         if (validityCode == null) {
