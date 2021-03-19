@@ -3,14 +3,19 @@ package com.xz.xlogin.controller;
 import com.xz.xlogin.bean.vo.ApiResult;
 import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.service.impl.AppServiceImpl;
+import com.xz.xlogin.utils.EmailUtil;
+import com.xz.xlogin.utils.RegexUtil;
 import com.xz.xlogin.utils.VerifyCodeUtil;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -25,6 +30,9 @@ import java.io.IOException;
 public class AppController {
     @Autowired
     AppServiceImpl appServiceImpl;
+
+    @Autowired
+    JavaMailSender javaMailSender;
 
     @GetMapping("/checkAppId")
     public Object verifyAppId(String appId) {
@@ -76,5 +84,30 @@ public class AppController {
             return new ApiResult(StatusEnum.STATUS_122, null);
         }
 
+    }
+
+    /**
+     * 发送普通邮件
+     */
+    @GetMapping("/sendVerifyEmail")
+    public Object verifyUser(@RequestParam String email,
+                             @RequestParam String key) {
+        //判断邮箱合法性
+        if (!RegexUtil.doRegex(email, RegexUtil.REGEX_EMAIL)) {
+            return new ApiResult(StatusEnum.STATUS_308, null);
+        }
+        //判断key合法
+        //todo 判断key合法性
+
+
+        try {
+            EmailUtil.sendVerifyCode("1234", email, javaMailSender);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            return new ApiResult(StatusEnum.ERROR, "验证码邮件发送异常，请检查邮箱地址");
+        }
+
+        //邮件已开始发送，必要时提示用户在垃圾邮件找回验证码
+        return new ApiResult(StatusEnum.SUCCESS, null);
     }
 }
