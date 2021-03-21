@@ -4,12 +4,10 @@ import com.xz.xlogin.bean.vo.ApiResult;
 import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.service.impl.AppServiceImpl;
 import com.xz.xlogin.utils.EmailUtil;
+import com.xz.xlogin.utils.RandomUtil;
 import com.xz.xlogin.utils.RegexUtil;
 import com.xz.xlogin.utils.VerifyCodeUtil;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,9 +28,8 @@ import java.io.IOException;
 public class AppController {
     @Autowired
     AppServiceImpl appServiceImpl;
-
     @Autowired
-    JavaMailSender javaMailSender;
+    private EmailUtil mailUtil;
 
     @GetMapping("/checkAppId")
     public Object verifyAppId(String appId) {
@@ -101,7 +98,7 @@ public class AppController {
 
 
         try {
-            EmailUtil.sendVerifyCode("1234", email, javaMailSender);
+            mailUtil.sendVerifyCode(RandomUtil.getRandom(4), email);
         } catch (MessagingException e) {
             e.printStackTrace();
             return new ApiResult(StatusEnum.ERROR, "验证码邮件发送异常，请检查邮箱地址");

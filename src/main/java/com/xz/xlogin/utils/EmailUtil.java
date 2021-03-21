@@ -1,33 +1,52 @@
 package com.xz.xlogin.utils;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.context.IContext;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Author: xz
  * @Date: 2021/3/20
  * Java Mail 相关邮箱操作工具类
  */
+@Component
 public class EmailUtil {
+    @Autowired
+    private JavaMailSender javaMailSender;
+    @Autowired
+    private TemplateEngine templateEngine;
 
-    public static void sendVerifyCode(String code, String email, JavaMailSender javaMailSender) throws MessagingException {
+    public void sendVerifyCode(String code, String email) throws MessagingException {
 
-        //SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        //simpleMailMessage.setFrom("c1076409897@126.com");
-        //simpleMailMessage.setTo(email);
-        //simpleMailMessage.setSubject("标题");
-        //simpleMailMessage.setText("内容");
-        //javaMailSender.send(simpleMailMessage);
 
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-        messageHelper.setSubject("XLogin用户注册");
-        messageHelper.setFrom("c1076409897@126.com");
-        messageHelper.setTo(email);
-        messageHelper.setText("内容测试内容测试:code:" + code, true);
-        javaMailSender.send(mimeMessage);
+        Context context = new Context();
+        context.setVariable("email", email);
+        context.setVariable("code", code);
+        context.setVariable("createTime", TimeUtil.getSimMilliDate("yyyy年MM月dd日 HH时ss分", System.currentTimeMillis()));
+
+        //读取短信码html模板
+        String templateContent = templateEngine.process("emailTemplet", context);
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setFrom("c1076409897@126.com");
+        helper.setTo(email);
+        helper.setSubject("XLogin用户注册");
+        helper.setText(templateContent, true);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                javaMailSender.send(message);
+            }
+        }).start();
     }
 }
