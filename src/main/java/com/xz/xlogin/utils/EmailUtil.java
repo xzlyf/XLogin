@@ -31,7 +31,7 @@ public class EmailUtil {
         Context context = new Context();
         context.setVariable("email", email);
         context.setVariable("code", code);
-        context.setVariable("createTime", TimeUtil.getSimMilliDate("yyyy年MM月dd日 HH时ss分", System.currentTimeMillis()));
+        context.setVariable("validityTime","5分钟");
 
         //读取短信码html模板
         String templateContent = templateEngine.process("emailTemplet", context);

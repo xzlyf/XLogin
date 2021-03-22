@@ -3,15 +3,13 @@ package com.xz.xlogin.controller;
 import com.xz.xlogin.bean.vo.ApiResult;
 import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.service.impl.AppServiceImpl;
+import com.xz.xlogin.service.impl.UserServiceImpl;
 import com.xz.xlogin.utils.EmailUtil;
 import com.xz.xlogin.utils.RandomUtil;
 import com.xz.xlogin.utils.RegexUtil;
 import com.xz.xlogin.utils.VerifyCodeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +27,11 @@ public class AppController {
     @Autowired
     AppServiceImpl appServiceImpl;
     @Autowired
+    UserServiceImpl userServiceImpl;
+    @Autowired
     private EmailUtil mailUtil;
+
+    private static String EMAIL_CODE_KEY = "x5g8gbtttJPWuS8m";
 
     @GetMapping("/checkAppId")
     public Object verifyAppId(String appId) {
@@ -46,8 +48,6 @@ public class AppController {
 
     @RequestMapping("/verifyImage")
     public void createImg(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        HttpSession session = request.getSession();
-        System.out.println("获取图片验证码session:" + session.getId() + "==是否新的:" + session.isNew());
         try {
             response.setContentType("image/jpeg");//设置相应类型,告诉浏览器输出的内容为图片
             response.setHeader("Pragma", "No-cache");//设置响应头信息，告诉浏览器不要缓存此内容
@@ -66,7 +66,6 @@ public class AppController {
                              HttpServletRequest request,
                              HttpServletResponse response) {
         HttpSession session = request.getSession();
-        System.out.println("验证验证码session:" + session.getId() + "==是否新的:" + session.isNew());
         //获取保存在会话中的正确验证码
         String validityCode = (String) session.getAttribute(VerifyCodeUtil.RANDOMCODEKEY);
         if (validityCode == null) {
@@ -76,6 +75,8 @@ public class AppController {
         if (code.equalsIgnoreCase(validityCode)) {
             //验证成功，移除会话中的验证码
             session.removeAttribute(VerifyCodeUtil.RANDOMCODEKEY);
+            //延长session过期事件 5分钟
+            session.setMaxInactiveInterval(5 * 60);
             return new ApiResult(StatusEnum.STATUS_123, null);
         } else {
             return new ApiResult(StatusEnum.STATUS_122, null);
@@ -86,19 +87,36 @@ public class AppController {
     /**
      * 发送普通邮件
      */
-    @GetMapping("/sendVerifyEmail")
+    @PostMapping("/sendVerifyEmail")
     public Object verifyUser(@RequestParam String email,
-                             @RequestParam String key) {
+                             @RequestParam String key,
+                             HttpServletRequest request,
+                             HttpServletResponse response) {
         //判断邮箱合法性
         if (!RegexUtil.doRegex(email, RegexUtil.REGEX_EMAIL)) {
-            return new ApiResult(StatusEnum.STATUS_308, null);
+            return new ApiResult(StatusEnum.STATUS_130, null);
         }
-        //判断key合法
+        //判断邮箱是否已注册
+        String isExist = userServiceImpl.isExistByEmail(email);
+        if (isExist != null) {
+            //存在
+            return new ApiResult(StatusEnum.STATUS_682, null);
+        }
         //todo 判断key合法性
 
 
+        //HttpSession session = request.getSession();
+        //if (session.isNew()) {
+        //    //会话已过期，目前时新会话，重新请求图形验证码
+        //    return new ApiResult(StatusEnum.STATUS_402, null);
+        //}
+        //
+        String code = RandomUtil.getRandom(4);
+        //session.setAttribute(EMAIL_CODE_KEY, code);
+
+
         try {
-            mailUtil.sendVerifyCode(RandomUtil.getRandom(4), email);
+            mailUtil.sendVerifyCode(code, email);
         } catch (MessagingException e) {
             e.printStackTrace();
             return new ApiResult(StatusEnum.ERROR, "验证码邮件发送异常，请检查邮箱地址");
