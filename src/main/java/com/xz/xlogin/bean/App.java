@@ -4,6 +4,7 @@ import lombok.Data;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 /**
  * @Author: xz
@@ -14,7 +15,7 @@ import javax.persistence.*;
 @Data
 @DynamicUpdate
 @Table(name = "app")
-public class App {
+public class App implements Serializable {
     @Id
     @GeneratedValue
     private Long id;

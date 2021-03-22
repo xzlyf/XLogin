@@ -24,6 +24,7 @@ public enum StatusEnum {
     STATUS_305(305, "缺少AppId参数"),
     STATUS_306(306, "非法AppId"),
     STATUS_307(307, "密钥无效"),
+    STATUS_308(308, "请求频繁"),
     STATUS_400(400, "参数错误"),
     STATUS_401(401, "缺失重要参数"),
     STATUS_402(402, "会话已过期"),

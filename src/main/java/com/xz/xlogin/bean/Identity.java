@@ -6,6 +6,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -16,7 +17,7 @@ import java.util.Date;
 @Data
 @DynamicUpdate
 @Table(name = "Identity")
-public class Identity {
+public class Identity implements Serializable {
     @Id
     @GenericGenerator(name = "system-uuid", strategy = "uuid") //这个是hibernate的注解/生成32位UUID
     @GeneratedValue(generator = "system-uuid")

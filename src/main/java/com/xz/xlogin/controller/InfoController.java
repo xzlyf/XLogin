@@ -1,8 +1,6 @@
 package com.xz.xlogin.controller;
 
 import com.xz.xlogin.bean.App;
-import com.xz.xlogin.bean.vo.ApiResult;
-import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.service.impl.AppServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class InfoController {
     @Autowired
     AppServiceImpl appServiceImpl;
-
 
     @GetMapping("/getUserRules")
     public String getUserRules(@RequestParam String appId) {

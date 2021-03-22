@@ -2,6 +2,7 @@ package com.xz.xlogin.controller;
 
 import com.xz.xlogin.bean.vo.ApiResult;
 import com.xz.xlogin.constant.StatusEnum;
+import com.xz.xlogin.service.RedisService;
 import com.xz.xlogin.service.impl.AppServiceImpl;
 import com.xz.xlogin.service.impl.UserServiceImpl;
 import com.xz.xlogin.utils.EmailUtil;
@@ -9,9 +10,9 @@ import com.xz.xlogin.utils.RandomUtil;
 import com.xz.xlogin.utils.RegexUtil;
 import com.xz.xlogin.utils.VerifyCodeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,8 +31,9 @@ public class AppController {
     UserServiceImpl userServiceImpl;
     @Autowired
     private EmailUtil mailUtil;
-
-    private static String EMAIL_CODE_KEY = "x5g8gbtttJPWuS8m";
+    @Autowired
+    RedisService redisService;
+    public static final String EMAIL_CODE_KEY = "ehtpTfxdnx9dzjcY";
 
     @GetMapping("/checkAppId")
     public Object verifyAppId(String appId) {
@@ -44,6 +46,11 @@ public class AppController {
     public void test(HttpServletResponse response, HttpServletRequest request) throws IOException {
         //接口转发  request.getContextPath() == /app/test
         response.sendRedirect(request.getContextPath() + "/checkAppId");
+    }
+
+    @GetMapping("/now")
+    public Object getNow() {
+        return new ApiResult(StatusEnum.SUCCESS, System.currentTimeMillis());
     }
 
     @RequestMapping("/verifyImage")
@@ -64,7 +71,7 @@ public class AppController {
     @GetMapping("verifyCode")
     public Object verifyCode(@RequestParam String code,
                              HttpServletRequest request,
-                             HttpServletResponse response) {
+                             HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession();
         //获取保存在会话中的正确验证码
         String validityCode = (String) session.getAttribute(VerifyCodeUtil.RANDOMCODEKEY);
@@ -75,8 +82,8 @@ public class AppController {
         if (code.equalsIgnoreCase(validityCode)) {
             //验证成功，移除会话中的验证码
             session.removeAttribute(VerifyCodeUtil.RANDOMCODEKEY);
-            //延长session过期事件 5分钟
-            session.setMaxInactiveInterval(5 * 60);
+            //接口转发
+            //response.sendRedirect(request.getContextPath() + "/sendVerifyEmail");
             return new ApiResult(StatusEnum.STATUS_123, null);
         } else {
             return new ApiResult(StatusEnum.STATUS_122, null);
@@ -85,44 +92,72 @@ public class AppController {
     }
 
     /**
-     * 发送普通邮件
+     * 发送验证码邮件
      */
     @PostMapping("/sendVerifyEmail")
-    public Object verifyUser(@RequestParam String email,
-                             @RequestParam String key,
-                             HttpServletRequest request,
-                             HttpServletResponse response) {
+    public Object sendVerifyEmail(@RequestParam String email,
+                                  @RequestParam String key,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response) {
         //判断邮箱合法性
         if (!RegexUtil.doRegex(email, RegexUtil.REGEX_EMAIL)) {
             return new ApiResult(StatusEnum.STATUS_130, null);
         }
+        //todo 判断key合法性
+
         //判断邮箱是否已注册
         String isExist = userServiceImpl.isExistByEmail(email);
         if (isExist != null) {
             //存在
             return new ApiResult(StatusEnum.STATUS_682, null);
         }
-        //todo 判断key合法性
 
-
-        //HttpSession session = request.getSession();
-        //if (session.isNew()) {
-        //    //会话已过期，目前时新会话，重新请求图形验证码
-        //    return new ApiResult(StatusEnum.STATUS_402, null);
-        //}
-        //
-        String code = RandomUtil.getRandom(4);
-        //session.setAttribute(EMAIL_CODE_KEY, code);
-
-
-        try {
-            mailUtil.sendVerifyCode(code, email);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-            return new ApiResult(StatusEnum.ERROR, "验证码邮件发送异常，请检查邮箱地址");
+        //剩余存活时间
+        long expire = redisService.getExpire(email);
+        if (expire >= 240) {
+            //不需要重发验证码，一分钟还没到
+            return new ApiResult(StatusEnum.STATUS_308, null);
         }
+        //验证码
+        String code = RandomUtil.getRandom(4);
+        redisService.remove(email);
+        redisService.set(email, code);
+        //验证码有效期5分钟，1分钟后可重发
+        redisService.expire(email, 300);
+
+        //开始发送验证码
+        //try {
+        //    mailUtil.sendVerifyCode(code, email);
+        //} catch (MessagingException e) {
+        //    e.printStackTrace();
+        //    return new ApiResult(StatusEnum.ERROR, "验证码邮件发送异常，请检查邮箱地址");
+        //}
 
         //邮件已开始发送，必要时提示用户在垃圾邮件找回验证码
         return new ApiResult(StatusEnum.SUCCESS, null);
+    }
+
+    /**
+     * 验证邮箱验证码
+     */
+    @PostMapping("/verifyEmailCode")
+    public Object verifyEmailCode(@RequestParam String email,
+                                  @RequestParam String code) {
+        //判断邮箱合法性
+        if (!RegexUtil.doRegex(email, RegexUtil.REGEX_EMAIL)) {
+            return new ApiResult(StatusEnum.STATUS_130, null);
+        }
+
+        String rightCode = redisService.get(email);
+        if (rightCode == null) {
+            return new ApiResult(StatusEnum.STATUS_121, null);
+        }
+
+        if (code.equalsIgnoreCase(rightCode)) {
+            redisService.remove(email);
+            return new ApiResult(StatusEnum.SUCCESS, null);
+        } else {
+            return new ApiResult(StatusEnum.STATUS_122, null);
+        }
     }
 }

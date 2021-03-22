@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -24,7 +25,7 @@ import java.util.Date;
 @DynamicUpdate
 @Table(name = "user_detail")
 @EntityListeners(AuditingEntityListener.class)
-public class UserDetail {
+public class UserDetail implements Serializable {
     /**
      * 主键自动生成id
      */
