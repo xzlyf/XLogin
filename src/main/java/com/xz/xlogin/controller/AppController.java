@@ -5,18 +5,16 @@ import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.service.RedisService;
 import com.xz.xlogin.service.impl.AppServiceImpl;
 import com.xz.xlogin.service.impl.UserServiceImpl;
-import com.xz.xlogin.utils.EmailUtil;
-import com.xz.xlogin.utils.RandomUtil;
-import com.xz.xlogin.utils.RegexUtil;
-import com.xz.xlogin.utils.VerifyCodeUtil;
+import com.xz.xlogin.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @Author: xz
@@ -84,6 +82,12 @@ public class AppController {
             session.removeAttribute(VerifyCodeUtil.RANDOMCODEKEY);
             //接口转发
             //response.sendRedirect(request.getContextPath() + "/sendVerifyEmail");
+            //演唱session存活时间
+            session.setMaxInactiveInterval(60);
+            //存储redis
+            redisService.set(session.getId(),
+                    TimeUtil.getSimMilliDate("yyyy-MM-dd HH:mm:ss", System.currentTimeMillis()));
+            redisService.expire(session.getId(), 60);
             return new ApiResult(StatusEnum.STATUS_123, null);
         } else {
             return new ApiResult(StatusEnum.STATUS_122, null);
@@ -96,15 +100,20 @@ public class AppController {
      */
     @PostMapping("/sendVerifyEmail")
     public Object sendVerifyEmail(@RequestParam String email,
-                                  @RequestParam String key,
                                   HttpServletRequest request,
                                   HttpServletResponse response) {
+        //判断会话是否合法
+        HttpSession session = request.getSession();
+        //如果redis没有这个session记录也表示会话过期
+        String date = redisService.get(session.getId());
+        if (session.isNew() || date == null) {
+            return new ApiResult(StatusEnum.STATUS_402, null);
+        }
         //判断邮箱合法性
+        email = URLDecoder.decode(email, StandardCharsets.UTF_8);//解决@变成%40
         if (!RegexUtil.doRegex(email, RegexUtil.REGEX_EMAIL)) {
             return new ApiResult(StatusEnum.STATUS_130, null);
         }
-        //todo 判断key合法性
-
         //判断邮箱是否已注册
         String isExist = userServiceImpl.isExistByEmail(email);
         if (isExist != null) {
