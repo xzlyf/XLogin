@@ -129,7 +129,10 @@ public class AppController {
         }
         //验证码
         String code = RandomUtil.getRandom(4);
+        //移除会话
+        redisService.remove(session.getId());
         redisService.remove(email);
+        //把邮箱验证码存放进redis
         redisService.set(email, code);
         //验证码有效期5分钟，1分钟后可重发
         redisService.expire(email, 300);
