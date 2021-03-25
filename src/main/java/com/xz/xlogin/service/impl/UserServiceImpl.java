@@ -139,10 +139,10 @@ public class UserServiceImpl implements UserService {
             case "qq":
                 return userRepo.findByOrderQQ(tPwd);
             case "token":
-                //手机号或账号都可登录
-                User user = userRepo.findByUserNo(cert);
+                //手机号或邮箱都可登录
+                User user = userRepo.findByUserPhone(cert);
                 if (user == null) {
-                    user = userRepo.findByUserPhone(cert);
+                    user = userRepo.findByUserEmail(cert);
                 }
                 return user;
             default:
