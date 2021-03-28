@@ -52,7 +52,7 @@ public class AppController {
     }
 
     @RequestMapping("/verifyImage")
-    public void createImg(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void createImg(HttpServletRequest request, HttpServletResponse response) {
         try {
             response.setContentType("image/jpeg");//设置相应类型,告诉浏览器输出的内容为图片
             response.setHeader("Pragma", "No-cache");//设置响应头信息，告诉浏览器不要缓存此内容
@@ -116,9 +116,9 @@ public class AppController {
         }
         //判断邮箱是否已注册
         String isExist = userServiceImpl.isExistByEmail(email);
-        if (isExist != null) {
-            //存在
-            return new ApiResult(StatusEnum.STATUS_682, null);
+        if (isExist == null) {
+            //不存在
+            return new ApiResult(StatusEnum.STATUS_691, null);
         }
 
         //剩余存活时间
