@@ -198,5 +198,19 @@ public class UserController {
         return new ApiResult(StatusEnum.SUCCESS, null);
     }
 
-    //todo 重置密码的接口
+    @PostMapping("/reset")
+    public Object reset(@RequestHeader(value = "appId") String appId,
+                        @RequestParam(value = "pwd") String pwd,
+                        @RequestParam(value = "cert") String cert,
+                        @RequestParam(value = "type") String type,
+                        @RequestParam(value = "t") Long timestamp,
+                        @RequestParam(value = "st") String st) {
+        //验证appId ----访问AppController的接口
+        App app = appServiceImpl.verifyByAppId(appId);
+        if (app == null) {
+            return new ApiResult(StatusEnum.STATUS_306, null);
+        }
+        //todo 完善重置密码接口
+        return null;
+    }
 }

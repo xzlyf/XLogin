@@ -25,21 +25,22 @@ public class EmailUtil {
     @Autowired
     private TemplateEngine templateEngine;
 
-    public void sendVerifyCode(String code, String email) throws MessagingException {
+    public void sendVerifyCode(String code, String email,String title, String template) throws MessagingException {
 
 
         Context context = new Context();
         context.setVariable("email", email);
         context.setVariable("code", code);
-        context.setVariable("validityTime","5分钟");
+        context.setVariable("validityTime", "5分钟");
 
         //读取短信码html模板
-        String templateContent = templateEngine.process("emailTemplet", context);
+        String templateContent = templateEngine.process(template, context);
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        //todo  发件人修改下 ，不要用这个
         helper.setFrom("c1076409897@126.com");
         helper.setTo(email);
-        helper.setSubject("XLogin用户注册");
+        helper.setSubject(title);
         helper.setText(templateContent, true);
 
         new Thread(new Runnable() {

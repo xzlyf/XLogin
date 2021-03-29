@@ -9,6 +9,7 @@ import com.xz.xlogin.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -100,6 +101,7 @@ public class AppController {
      */
     @PostMapping("/sendVerifyEmail")
     public Object sendVerifyEmail(@RequestParam String email,
+                                  @RequestParam String type,
                                   HttpServletRequest request,
                                   HttpServletResponse response) {
         //判断会话是否合法
@@ -138,12 +140,18 @@ public class AppController {
         redisService.expire(email, 300);
 
         //开始发送验证码
-        //try {
-        //    mailUtil.sendVerifyCode(code, email);
-        //} catch (MessagingException e) {
-        //    e.printStackTrace();
-        //    return new ApiResult(StatusEnum.ERROR, "验证码邮件发送异常，请检查邮箱地址");
-        //}
+        try {
+            if (type.equals("register")) {
+                mailUtil.sendVerifyCode(code, email,"XLogin用户注册", "emailTempletRegister");
+            } else if (type.equals("reset")) {
+                mailUtil.sendVerifyCode(code, email, "XLogin找回密码","emailTempletReset");
+            } else {
+                return new ApiResult(StatusEnum.STATUS_400, null);
+            }
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            return new ApiResult(StatusEnum.ERROR, "验证码邮件发送异常，请检查邮箱地址");
+        }
 
         //邮件已开始发送，必要时提示用户在垃圾邮件找回验证码
         return new ApiResult(StatusEnum.SUCCESS, null);
