@@ -1,6 +1,5 @@
 package com.xz.xlogin.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.xz.xlogin.bean.User;
 import com.xz.xlogin.bean.entity.AccountMark;
 import com.xz.xlogin.constant.Local;
@@ -9,13 +8,12 @@ import com.xz.xlogin.repository.UserRepo;
 import com.xz.xlogin.service.UserService;
 import com.xz.xlogin.utils.DESUtil;
 import com.xz.xlogin.utils.RSAUtil;
-import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Date;
 
 /**
  * @Author: xz
@@ -148,6 +146,39 @@ public class UserServiceImpl implements UserService {
             default:
                 return null;
         }
+    }
+
+    /**
+     * 重置密码
+     *
+     * @param cert 账号
+     * @param tPwd 账号明文
+     * @param type 账号类型
+     */
+    @Override
+    public int resetPwd(String cert, String tPwd, String type) {
+        String desPwd;
+        //将明文密码进行单项加密存入数据库
+        try {
+            desPwd = DESUtil.encrypt(tPwd, Local.secretKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 2;
+        }
+        User user = null;
+        switch (type) {
+            case "phone":
+                user = userRepo.findByUserPhone(cert);
+                break;
+            case "email":
+                user = userRepo.findByUserEmail(cert);
+                break;
+        }
+        if (user == null) {
+            return 3;
+        }
+        userRepo.updateUserPwd(user.getUuid(), desPwd, new Date(System.currentTimeMillis()));
+        return 1;
     }
 
     /**

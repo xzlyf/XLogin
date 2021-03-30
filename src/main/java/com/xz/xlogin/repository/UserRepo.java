@@ -2,13 +2,22 @@ package com.xz.xlogin.repository;
 
 import com.xz.xlogin.bean.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
 
 /**
  * @Author: xz
  * @Date: 2021/3/4
  */
 public interface UserRepo extends JpaRepository<User, Long> {
+    @Transactional
+    @Modifying
+    @Query("update User t  set t.userPwd=?2,t.updateTime=?3 where t.uuid=?1")
+    void updateUserPwd(String uuid, String userPwd, Date date);
+
     /**
      * 查询账号是否存在
      */

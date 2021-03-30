@@ -203,6 +203,7 @@ public class UserController {
                         @RequestParam(value = "pwd") String pwd,
                         @RequestParam(value = "cert") String cert,
                         @RequestParam(value = "type") String type,
+                        @RequestParam(value = "code") String code,
                         @RequestParam(value = "t") Long timestamp,
                         @RequestParam(value = "st") String st) {
         //验证appId ----访问AppController的接口
@@ -210,7 +211,42 @@ public class UserController {
         if (app == null) {
             return new ApiResult(StatusEnum.STATUS_306, null);
         }
-        //todo 完善重置密码接口
-        return null;
+        //验证账号是否已注册
+        AccountMark mark = userServiceImpl.existCert(cert, type);
+        if (!mark.isExist()) {
+            return new ApiResult(StatusEnum.getEnum(mark.getStatusCode()), null);
+        }
+        //验证验证码
+        if (type.equals("phone")) {
+            return new ApiResult(StatusEnum.STATUS_131, null);
+        } else if (type.equals("email")) {
+            int statue = appServiceImpl.verifyEmailCode(cert, code);
+            if (statue != 1) {
+                switch (statue) {
+                    case 2:
+                        return new ApiResult(StatusEnum.STATUS_122, null);
+                    case 3:
+                        return new ApiResult(StatusEnum.STATUS_121, null);
+                    default:
+                        return new ApiResult(StatusEnum.ERROR, null);
+                }
+            }
+        } else {
+            return new ApiResult(StatusEnum.STATUS_400, null);
+        }
+
+        //解密RSA
+        String tPwd = userServiceImpl.decodeRSA(pwd);
+        if (tPwd == null) {
+            return new ApiResult(StatusEnum.STATUS_307, null);
+        }
+
+        int statue = userServiceImpl.resetPwd(cert, tPwd, type);
+        if (statue == 1) {
+            return new ApiResult(StatusEnum.SUCCESS, null);
+        } else {
+            return new ApiResult(StatusEnum.ERROR, "修改密码失败");
+        }
+
     }
 }

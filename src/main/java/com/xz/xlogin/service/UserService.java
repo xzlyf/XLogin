@@ -20,6 +20,8 @@ public interface UserService {
 
     User verifyByPwd(String account, String tPwd, String type);
 
+    int resetPwd(String cert, String tPwd, String type);
+
     String isExistByUserNo(String userNo);
 
     String isExistByPhone(String phone);

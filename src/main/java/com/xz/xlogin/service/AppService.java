@@ -14,4 +14,6 @@ public interface AppService {
      * @return true  合法  False 不存在
      */
     App verifyByAppId(String appId);
+
+    int verifyEmailCode(String email, String code);
 }

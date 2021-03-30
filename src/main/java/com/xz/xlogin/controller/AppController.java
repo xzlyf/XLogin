@@ -2,8 +2,8 @@ package com.xz.xlogin.controller;
 
 import com.xz.xlogin.bean.vo.ApiResult;
 import com.xz.xlogin.constant.StatusEnum;
-import com.xz.xlogin.service.RedisService;
 import com.xz.xlogin.service.impl.AppServiceImpl;
+import com.xz.xlogin.service.impl.RedisServiceImpl;
 import com.xz.xlogin.service.impl.UserServiceImpl;
 import com.xz.xlogin.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +31,7 @@ public class AppController {
     @Autowired
     private EmailUtil mailUtil;
     @Autowired
-    RedisService redisService;
-    public static final String EMAIL_CODE_KEY = "ehtpTfxdnx9dzjcY";
+    RedisServiceImpl redisServiceImpl;
 
     @GetMapping("/checkAppId")
     public Object verifyAppId(String appId) {
@@ -86,9 +85,9 @@ public class AppController {
             //演唱session存活时间
             session.setMaxInactiveInterval(60);
             //存储redis
-            redisService.set(session.getId(),
+            redisServiceImpl.set(session.getId(),
                     TimeUtil.getSimMilliDate("yyyy-MM-dd HH:mm:ss", System.currentTimeMillis()));
-            redisService.expire(session.getId(), 60);
+            redisServiceImpl.expire(session.getId(), 60);
             return new ApiResult(StatusEnum.STATUS_123, null);
         } else {
             return new ApiResult(StatusEnum.STATUS_122, null);
@@ -107,7 +106,7 @@ public class AppController {
         //判断会话是否合法
         HttpSession session = request.getSession();
         //如果redis没有这个session记录也表示会话过期
-        String date = redisService.get(session.getId());
+        String date = redisServiceImpl.get(session.getId());
         if (session.isNew() || date == null) {
             return new ApiResult(StatusEnum.STATUS_402, null);
         }
@@ -124,7 +123,7 @@ public class AppController {
         }
 
         //剩余存活时间
-        long expire = redisService.getExpire(email);
+        long expire = redisServiceImpl.getExpire(email);
         if (expire >= 240) {
             //不需要重发验证码，一分钟还没到
             return new ApiResult(StatusEnum.STATUS_308, null);
@@ -132,19 +131,19 @@ public class AppController {
         //验证码
         String code = RandomUtil.getRandom(4);
         //移除会话
-        redisService.remove(session.getId());
-        redisService.remove(email);
+        redisServiceImpl.remove(session.getId());
+        redisServiceImpl.remove(email);
         //把邮箱验证码存放进redis
-        redisService.set(email, code);
+        redisServiceImpl.set(email, code);
         //验证码有效期5分钟，1分钟后可重发
-        redisService.expire(email, 300);
+        redisServiceImpl.expire(email, 300);
 
         //开始发送验证码
         try {
             if (type.equals("register")) {
-                mailUtil.sendVerifyCode(code, email,"XLogin用户注册", "emailTempletRegister");
+                mailUtil.sendVerifyCode(code, email, "XLogin用户注册", "emailTempletRegister");
             } else if (type.equals("reset")) {
-                mailUtil.sendVerifyCode(code, email, "XLogin找回密码","emailTempletReset");
+                mailUtil.sendVerifyCode(code, email, "XLogin找回密码", "emailTempletReset");
             } else {
                 return new ApiResult(StatusEnum.STATUS_400, null);
             }
@@ -167,17 +166,17 @@ public class AppController {
         if (!RegexUtil.doRegex(email, RegexUtil.REGEX_EMAIL)) {
             return new ApiResult(StatusEnum.STATUS_130, null);
         }
-
-        String rightCode = redisService.get(email);
-        if (rightCode == null) {
-            return new ApiResult(StatusEnum.STATUS_121, null);
+        int statue = appServiceImpl.verifyEmailCode(email, code);
+        switch (statue) {
+            case 1:
+                return new ApiResult(StatusEnum.SUCCESS, null);
+            case 2:
+                return new ApiResult(StatusEnum.STATUS_122, null);
+            case 3:
+                return new ApiResult(StatusEnum.STATUS_121, null);
+            default:
+                return new ApiResult(StatusEnum.ERROR, null);
         }
 
-        if (code.equalsIgnoreCase(rightCode)) {
-            redisService.remove(email);
-            return new ApiResult(StatusEnum.SUCCESS, null);
-        } else {
-            return new ApiResult(StatusEnum.STATUS_122, null);
-        }
     }
 }
