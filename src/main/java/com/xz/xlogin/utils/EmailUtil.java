@@ -9,7 +9,9 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.context.IContext;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +27,7 @@ public class EmailUtil {
     @Autowired
     private TemplateEngine templateEngine;
 
-    public void sendVerifyCode(String code, String email,String title, String template) throws MessagingException {
+    public void sendVerifyCode(String code, String email,String title, String template) throws MessagingException, UnsupportedEncodingException {
 
 
         Context context = new Context();
@@ -38,7 +40,8 @@ public class EmailUtil {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         //todo  发件人修改下 ，不要用这个
-        helper.setFrom("c1076409897@126.com");
+        //helper.setFrom("c1076409897@126.com");
+        helper.setFrom(new InternetAddress("c1076409897@126.com", "XLogin服务", "UTF-8"));
         helper.setTo(email);
         helper.setSubject(title);
         helper.setText(templateContent, true);

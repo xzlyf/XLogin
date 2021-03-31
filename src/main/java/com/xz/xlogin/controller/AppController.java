@@ -117,11 +117,28 @@ public class AppController {
         }
         //判断邮箱是否已注册
         String isExist = userServiceImpl.isExistByEmail(email);
+        //根据type类型判断是否拦截
         if (isExist == null) {
-            //不存在
-            return new ApiResult(StatusEnum.STATUS_691, null);
+            //账号未注册
+            switch (type) {
+                case "register":
+                    break;
+                case "reset":
+                    return new ApiResult(StatusEnum.STATUS_691, null);
+                default:
+                    return new ApiResult(StatusEnum.STATUS_400, null);
+            }
+        } else {
+            //账号已注册
+            switch (type) {
+                case "register":
+                    return new ApiResult(StatusEnum.STATUS_682, null);
+                case "reset":
+                    break;
+                default:
+                    return new ApiResult(StatusEnum.STATUS_400, null);
+            }
         }
-
         //剩余存活时间
         long expire = redisServiceImpl.getExpire(email);
         if (expire >= 240) {
@@ -147,7 +164,7 @@ public class AppController {
             } else {
                 return new ApiResult(StatusEnum.STATUS_400, null);
             }
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return new ApiResult(StatusEnum.ERROR, "验证码邮件发送异常，请检查邮箱地址");
         }
