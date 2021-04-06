@@ -135,6 +135,7 @@ public class UserController {
                         @RequestParam(value = "st") String st,
                         HttpServletResponse response,
                         HttpServletRequest request) {
+        //todo 频繁请求处理
 
         //判断账号是否已注册
         AccountMark mark = userServiceImpl.existCert(cert, type);

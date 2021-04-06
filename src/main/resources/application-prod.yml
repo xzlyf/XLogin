@@ -1,0 +1,27 @@
+#开发环境
+server:
+  port: 8080
+
+spring:
+  datasource:
+    username: root
+    password: xzlyf297
+    url: jdbc:mysql://localhost:3306/xlogin?useUnicode=true&characterEncoding=utf-8
+    driver-class-name: com.mysql.jdbc.Driver
+
+  jackson:
+    default-property-inclusion: non_null #json不返回null的属性
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  thymeleaf:
+    cache: true
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+    mode: HTML5
+    servlet:
+      content-type: text/html
