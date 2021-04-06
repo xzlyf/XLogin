@@ -1,7 +1,6 @@
-#开发环境
+#发布环境
 server:
-  port: 8080
-
+  port: 80
 spring:
   datasource:
     username: root
@@ -11,17 +10,46 @@ spring:
 
   jackson:
     default-property-inclusion: non_null #json不返回null的属性
-
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
-
   thymeleaf:
-    cache: true
+    cache: false #开发时关闭缓存,不然没法看到实时页面
     prefix: classpath:/templates/
     suffix: .html
     encoding: UTF-8
     mode: HTML5
     servlet:
       content-type: text/html
+  mail:
+    #---qq邮箱---
+    #POP3端口995
+    #SMTP端口465或587
+    #---126邮箱--
+    #POP3端口110
+    #SMTP端口25
+    #IMAP端口143
+    host: smtp.126.com
+    port: 25
+    default-encoding: utf-8
+    username: c1076409897@126.com
+    password: VNBZOZSGIUMOOUUD
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required: true
+
+  redis:
+    port: 6379
+    host: 127.0.0.1
+    password: xzlyf297
+    jedis:
+      pool:
+        max-active: 8 # 连接池中最大连接数（使用负值则表示没有限制）
+        max-wait: -1ms # 连接池中最大阻塞等待时间（使用负值则表示没有限制）
+        max-idle: 8 # 连接池中的最大空闲连接
+        min-idle: 0 # 连接池中的最小空闲连接
+    timeout: 3000ms # 连接超时时间
