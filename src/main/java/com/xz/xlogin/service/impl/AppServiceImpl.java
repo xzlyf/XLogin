@@ -28,6 +28,8 @@ public class AppServiceImpl implements AppService {
      */
     @Override
     public App verifyByAppId(@NonNull String appId) {
+        //todo 改为查询redis缓存 减少数据库压力
+
         return appRepo.findByAppId(appId);
     }
 
