@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Author: xz
@@ -33,20 +34,17 @@ public class AppServiceImpl implements AppService {
     @Override
     public boolean verifyByAppId(@NonNull String appId) {
         //todo 删除appid记得也要删除缓存中的appId
-        //查询缓存
-        List<Object> appIdList = redisUtil.lGet("appId", 0, -1);
-        if (appIdList != null) {
-            int index = appIdList.indexOf(appId);
-            if (index != -1) {
-                //在缓存中找到appid那就直接返回
-                return true;
-            }
+
+        //查询缓存是否存在appId
+        boolean isExist = redisUtil.sHasKey("appId", appId);
+        if (isExist) {
+            return true;
         }
         //缓存找不到就查询数据库
         App app = appRepo.findByAppId(appId);
         if (app != null) {
             //如果appId的确存在则存入缓存
-            redisUtil.lSet("appId", app.getAppId());
+            redisUtil.sSet("appId", appId);
             return true;
         }
         //找遍了缓存和数据库都找不到那就返回false
