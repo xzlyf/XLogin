@@ -59,8 +59,8 @@ public class UserController {
             return new ApiResult(StatusEnum.getEnum(mark.getStatusCode()), null);
         }
         //验证appId ----访问AppController的接口
-        App app = appServiceImpl.verifyByAppId(appId);
-        if (app == null) {
+        if (!appServiceImpl.verifyByAppId(appId)) {
+           //appId不存在
             return new ApiResult(StatusEnum.STATUS_306, null);
         }
         //解密RSA
@@ -143,10 +143,11 @@ public class UserController {
             return new ApiResult(StatusEnum.getEnum(mark.getStatusCode()), null);
         }
         //验证appId ----访问AppController的接口
-        App app = appServiceImpl.verifyByAppId(appId);
-        if (app == null) {
+        if (!appServiceImpl.verifyByAppId(appId)) {
+            //appId不存在
             return new ApiResult(StatusEnum.STATUS_306, null);
         }
+        App app = appServiceImpl.getApp(appId);
         //解密RSA
         String tPwd = userServiceImpl.decodeRSA(pwd);
         if (tPwd == null) {
@@ -181,10 +182,11 @@ public class UserController {
                          @RequestParam String token) {
 
         //验证appId ----访问AppController的接口
-        App app = appServiceImpl.verifyByAppId(appId);
-        if (app == null) {
+        if (!appServiceImpl.verifyByAppId(appId)) {
+            //appId不存在
             return new ApiResult(StatusEnum.STATUS_306, null);
         }
+        App app = appServiceImpl.getApp(appId);
         //获取账号对象
         User user = userServiceImpl.verifyByPwd(cert, token, "token");
         if (user == null) {
@@ -208,8 +210,8 @@ public class UserController {
                         @RequestParam(value = "t") Long timestamp,
                         @RequestParam(value = "st") String st) {
         //验证appId ----访问AppController的接口
-        App app = appServiceImpl.verifyByAppId(appId);
-        if (app == null) {
+        if (!appServiceImpl.verifyByAppId(appId)) {
+            //appId不存在
             return new ApiResult(StatusEnum.STATUS_306, null);
         }
         //验证账号是否已注册

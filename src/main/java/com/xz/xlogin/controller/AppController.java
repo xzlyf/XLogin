@@ -3,13 +3,11 @@ package com.xz.xlogin.controller;
 import com.xz.xlogin.bean.vo.ApiResult;
 import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.service.impl.AppServiceImpl;
-import com.xz.xlogin.service.impl.RedisServiceImpl;
 import com.xz.xlogin.service.impl.UserServiceImpl;
 import com.xz.xlogin.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -31,7 +29,7 @@ public class AppController {
     @Autowired
     private EmailUtil mailUtil;
     @Autowired
-    RedisServiceImpl redisServiceImpl;
+    RedisUtil redisUtil;
 
     @GetMapping("/checkAppId")
     public Object verifyAppId(String appId) {
@@ -82,12 +80,12 @@ public class AppController {
             session.removeAttribute(VerifyCodeUtil.RANDOMCODEKEY);
             //接口转发
             //response.sendRedirect(request.getContextPath() + "/sendVerifyEmail");
-            //演唱session存活时间
+            //延长session存活时间
             session.setMaxInactiveInterval(60);
             //存储redis
-            redisServiceImpl.set(session.getId(),
+            redisUtil.set(session.getId(),
                     TimeUtil.getSimMilliDate("yyyy-MM-dd HH:mm:ss", System.currentTimeMillis()));
-            redisServiceImpl.expire(session.getId(), 60);
+            redisUtil.expire(session.getId(), 60);
             return new ApiResult(StatusEnum.STATUS_123, null);
         } else {
             return new ApiResult(StatusEnum.STATUS_122, null);
@@ -106,7 +104,7 @@ public class AppController {
         //判断会话是否合法
         HttpSession session = request.getSession();
         //如果redis没有这个session记录也表示会话过期
-        String date = redisServiceImpl.get(session.getId());
+        String date = (String) redisUtil.get(session.getId());
         if (session.isNew() || date == null) {
             return new ApiResult(StatusEnum.STATUS_402, null);
         }
@@ -140,7 +138,7 @@ public class AppController {
             }
         }
         //剩余存活时间
-        long expire = redisServiceImpl.getExpire(email);
+        long expire = redisUtil.getExpire(email);
         if (expire >= 240) {
             //不需要重发验证码，一分钟还没到
             return new ApiResult(StatusEnum.STATUS_308, null);
@@ -148,13 +146,12 @@ public class AppController {
         //验证码
         String code = RandomUtil.getRandom(4);
         //移除会话
-        redisServiceImpl.remove(session.getId());
-        redisServiceImpl.remove(email);
+        redisUtil.del(session.getId());
+        redisUtil.del(email);
         //把邮箱验证码存放进redis
-        redisServiceImpl.set(email, code);
+        redisUtil.set(email, code);
         //验证码有效期5分钟，1分钟后可重发
-        redisServiceImpl.expire(email, 300);
-
+        redisUtil.expire(email, 300);
         //开始发送验证码
         try {
             if (type.equals("register")) {

@@ -20,8 +20,7 @@ public class InfoController {
 
     @GetMapping("/getUserRules")
     public String getUserRules(@RequestParam String appId) {
-        App app = appServiceImpl.verifyByAppId(appId);
-        if (app == null) {
+        if (!appServiceImpl.verifyByAppId(appId)) {
             return "404";
         }
 

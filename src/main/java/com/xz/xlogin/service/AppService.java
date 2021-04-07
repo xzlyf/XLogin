@@ -13,7 +13,9 @@ public interface AppService {
      * @param appId 待校验的appId
      * @return true  合法  False 不存在
      */
-    App verifyByAppId(String appId);
+    boolean verifyByAppId(String appId);
+
+    App getApp(String appId);
 
     int verifyEmailCode(String email, String code);
 }
