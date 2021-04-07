@@ -50,8 +50,8 @@ public class UserController {
                            @RequestParam(value = "pwd") String pwd,
                            @RequestParam(value = "cert") String cert,
                            @RequestParam(value = "type") String type,
-                           @RequestParam(value = "t") Long timestamp,
-                           @RequestParam(value = "st") String st) {
+                           @RequestParam(value = "t", required = false) Long timestamp,
+                           @RequestParam(value = "st", required = false) String st) {
 
         //判断账号是否已注册
         AccountMark mark = userServiceImpl.existCert(cert, type);
@@ -60,7 +60,7 @@ public class UserController {
         }
         //验证appId ----访问AppController的接口
         if (!appServiceImpl.verifyByAppId(appId)) {
-           //appId不存在
+            //appId不存在
             return new ApiResult(StatusEnum.STATUS_306, null);
         }
         //解密RSA
@@ -131,8 +131,8 @@ public class UserController {
                         @RequestParam(value = "cert") String cert,
                         @RequestParam(value = "pwd") String pwd,
                         @RequestParam(value = "type") String type,
-                        @RequestParam(value = "t") Long timestamp,
-                        @RequestParam(value = "st") String st,
+                        @RequestParam(value = "t", required = false) Long timestamp,
+                        @RequestParam(value = "st", required = false) String st,
                         HttpServletResponse response,
                         HttpServletRequest request) {
         //todo 频繁请求处理
@@ -207,8 +207,8 @@ public class UserController {
                         @RequestParam(value = "cert") String cert,
                         @RequestParam(value = "type") String type,
                         @RequestParam(value = "code") String code,
-                        @RequestParam(value = "t") Long timestamp,
-                        @RequestParam(value = "st") String st) {
+                        @RequestParam(value = "t", required = false) Long timestamp,
+                        @RequestParam(value = "st", required = false) String st) {
         //验证appId ----访问AppController的接口
         if (!appServiceImpl.verifyByAppId(appId)) {
             //appId不存在

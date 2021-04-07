@@ -5,6 +5,7 @@ import com.xz.xlogin.bean.vo.ApiResult;
 import com.xz.xlogin.constant.Local;
 import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.utils.MD5Util;
+import com.xz.xlogin.utils.SecretUtil;
 import com.xz.xlogin.utils.ServletUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * interceptor for api sign
@@ -26,7 +29,7 @@ public class SignInterceptor implements HandlerInterceptor {
      * @param request：请求对象
      * @param response：响应对象
      * @param handler：处理对象：controller中的信息
-     * @return:true表示正常,false表示被拦截
+     * @return true表示正常, false表示被拦截
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -61,17 +64,24 @@ public class SignInterceptor implements HandlerInterceptor {
             return false;
         }
 
+        //todo 读取redis中的appId和appSecret
 
-        //开始校验签名  参考验参规则
-        String origin;
-        origin = MD5Util.getMD5(appId + Local.client_secret + timestampStr + Local.version);
-        //todo 做好日志存储
+        /*
+         *开始校验签名  参考验参规则
+         * 2.0 sign加密
+         * 规则：根据key的ANSI码从小到大排序得到
+         * MD5(AppId+Key=Value+Key=Value...+Key=Value+AppSecret+ServerVersion)
+         * （+号 =号 省略）
+         */
+        System.out.println("===================");
+        String origin = SecretUtil.getSignByRequest(request);//计算签名
         System.out.println("timestamp------->" + timestamp);
         System.out.println("appId    ------->" + appId);
-        System.out.println("sign     ------->" + sign);
+        System.out.println("clientSign------>" + sign);
         System.out.println("originSign------>" + origin);
+        //todo 做好日志存储
         assert origin != null;
-        //todo 思考下怎么验签好
+
         if (!origin.equalsIgnoreCase(sign)) {
             ServletUtil.renderString(response, JSON.toJSONString(new ApiResult(StatusEnum.STATUS_301, null)));
             return false;
