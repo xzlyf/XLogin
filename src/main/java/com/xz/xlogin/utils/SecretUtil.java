@@ -1,10 +1,11 @@
 package com.xz.xlogin.utils;
 
 
-import com.xz.xlogin.constant.Local;
-
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author czr
@@ -18,26 +19,25 @@ public class SecretUtil {
      *
      * @param timestamp 时间戳
      */
-    public static String getSign(long timestamp) {
-        return MD5Util.getMD5(Local.app_id + Local.app_secret + timestamp + Local.version);
+    public static String getSign(long timestamp,String appId,String appSecret,String version) {
+        return MD5Util.getMD5(appId + appSecret + timestamp + version);
     }
 
     /**
      * 2.0 sign加密
      * 规则：根据key的ANSI码从小到大排序得到
-     * MD5(AppId+Key=Value+Key=Value...+Key=Value+AppSecret+ServerVersion)
+     * MD5(AppId+Key=Value+Key=Value...+Key=Value+AppSecret)
      * （+号 =号 省略）
      */
-    public static String getSign(Map<String, Object> params) {
+    public static String getSign(Map<String, Object> params,String appId,String appSecret) {
         Map<String, Object> newParams = sortMapByKey(params);
         StringBuilder sb = new StringBuilder();
-        sb.append(Local.app_id);
+        sb.append(appId);
         for (String key : newParams.keySet()) {
             sb.append(key);
             sb.append(newParams.get(key));
         }
-        sb.append(Local.app_secret);
-        sb.append(Local.version);
+        sb.append(appSecret);
         return MD5Util.getMD5(sb.toString());
     }
 
@@ -45,14 +45,14 @@ public class SecretUtil {
      * 服务端调用
      * 获取请求者的sign
      */
-    public static String getSignByRequest(HttpServletRequest request) throws NullPointerException {
+    public static String getSignByRequest(HttpServletRequest request,String appId,String appSecret) throws NullPointerException {
 
         Map<String, String[]> params = request.getParameterMap();
         Map<String, Object> newParams = new HashMap<>();
         for (String key : params.keySet()) {
             newParams.put(key, params.get(key)[0]);
         }
-        return getSign(newParams);
+        return getSign(newParams,appId,appSecret);
     }
 
 

@@ -58,11 +58,6 @@ public class UserController {
         if (mark.isExist()) {
             return new ApiResult(StatusEnum.getEnum(mark.getStatusCode()), null);
         }
-        //验证appId ----访问AppController的接口
-        if (!appServiceImpl.verifyByAppId(appId)) {
-            //appId不存在
-            return new ApiResult(StatusEnum.STATUS_306, null);
-        }
         //解密RSA
         String tPwd = userServiceImpl.decodeRSA(pwd);
         if (tPwd == null) {
@@ -142,12 +137,6 @@ public class UserController {
         if (!mark.isExist()) {
             return new ApiResult(StatusEnum.getEnum(mark.getStatusCode()), null);
         }
-        //验证appId ----访问AppController的接口
-        if (!appServiceImpl.verifyByAppId(appId)) {
-            //appId不存在
-            return new ApiResult(StatusEnum.STATUS_306, null);
-        }
-        App app = appServiceImpl.getApp(appId);
         //解密RSA
         String tPwd = userServiceImpl.decodeRSA(pwd);
         if (tPwd == null) {
@@ -158,6 +147,9 @@ public class UserController {
         if (user == null) {
             return new ApiResult(StatusEnum.STATUS_601, null);
         }
+        //获取app对象
+        App app = appServiceImpl.getApp(appId);
+
         //如果登录类型为token
         if (type.equals("token")) {
             //token登录操作
@@ -181,17 +173,13 @@ public class UserController {
                          @RequestParam String cert,
                          @RequestParam String token) {
 
-        //验证appId ----访问AppController的接口
-        if (!appServiceImpl.verifyByAppId(appId)) {
-            //appId不存在
-            return new ApiResult(StatusEnum.STATUS_306, null);
-        }
-        App app = appServiceImpl.getApp(appId);
         //获取账号对象
         User user = userServiceImpl.verifyByPwd(cert, token, "token");
         if (user == null) {
             return new ApiResult(StatusEnum.STATUS_601, null);
         }
+        //获取app对象
+        App app = appServiceImpl.getApp(appId);
         //验证token
         Identity identity = identityServiceImpl.verifyToken(app, user, token);
         if (identity == null) {
@@ -209,11 +197,6 @@ public class UserController {
                         @RequestParam(value = "code") String code,
                         @RequestParam(value = "t", required = false) Long timestamp,
                         @RequestParam(value = "st", required = false) String st) {
-        //验证appId ----访问AppController的接口
-        if (!appServiceImpl.verifyByAppId(appId)) {
-            //appId不存在
-            return new ApiResult(StatusEnum.STATUS_306, null);
-        }
         //验证账号是否已注册
         AccountMark mark = userServiceImpl.existCert(cert, type);
         if (!mark.isExist()) {

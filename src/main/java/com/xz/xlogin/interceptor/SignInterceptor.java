@@ -2,20 +2,18 @@ package com.xz.xlogin.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.xz.xlogin.bean.vo.ApiResult;
-import com.xz.xlogin.constant.Local;
 import com.xz.xlogin.constant.StatusEnum;
-import com.xz.xlogin.utils.MD5Util;
+import com.xz.xlogin.service.impl.AppServiceImpl;
 import com.xz.xlogin.utils.SecretUtil;
 import com.xz.xlogin.utils.ServletUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.Map;
 
 /**
  * interceptor for api sign
@@ -23,6 +21,8 @@ import java.util.Map;
  */
 @Component
 public class SignInterceptor implements HandlerInterceptor {
+    @Autowired
+    AppServiceImpl appServiceImpl;
     private static long REQUEST_TIMEOUT = 5 * 60 * 1000;//服务器时间不可与服务器相差超过n分钟
 
     /**
@@ -51,34 +51,40 @@ public class SignInterceptor implements HandlerInterceptor {
             ServletUtil.renderString(response, JSON.toJSONString(new ApiResult(StatusEnum.STATUS_401, null)));
             return false;
         }
-        //拦截appid异常的的请求
+        //拦截空appid的的请求
         String appId = request.getHeader("appid");
         if (StringUtils.isBlank(appId)) {
             ServletUtil.renderString(response, JSON.toJSONString(new ApiResult(StatusEnum.STATUS_401, null)));
             return false;
         }
-        //拦截签名校验失败的请求
+        //拦截空签名的请求
         String sign = request.getHeader("sign");
         if (StringUtils.isBlank(sign)) {
             ServletUtil.renderString(response, JSON.toJSONString(new ApiResult(StatusEnum.STATUS_401, null)));
             return false;
         }
 
-        //todo 读取redis中的appId和appSecret
-
+        //通过读取appSecret判断请求者appId是否合法
+        String appSecret = appServiceImpl.getAppSecret(appId);
+        if (appSecret == null) {
+            //非法appId
+            ServletUtil.renderString(response, JSON.toJSONString(new ApiResult(StatusEnum.STATUS_306, null)));
+            return false;
+        }
         /*
          *开始校验签名  参考验参规则
          * 2.0 sign加密
          * 规则：根据key的ANSI码从小到大排序得到
-         * MD5(AppId+Key=Value+Key=Value...+Key=Value+AppSecret+ServerVersion)
+         * MD5(AppId+Key=Value+Key=Value...+Key=Value+AppSecret)
          * （+号 =号 省略）
          */
+        String origin = SecretUtil.getSignByRequest(request, appId, appSecret);//计算签名
         System.out.println("===================");
-        String origin = SecretUtil.getSignByRequest(request);//计算签名
         System.out.println("timestamp------->" + timestamp);
         System.out.println("appId    ------->" + appId);
         System.out.println("clientSign------>" + sign);
         System.out.println("originSign------>" + origin);
+        System.out.println("===================");
         //todo 做好日志存储
         assert origin != null;
 

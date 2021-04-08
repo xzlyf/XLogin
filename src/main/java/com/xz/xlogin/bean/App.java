@@ -20,8 +20,11 @@ public class App implements Serializable {
     @GeneratedValue
     private Long id;
 
-    @Column(name = "app_id",unique = true)
+    @Column(name = "app_id", unique = true)
     private String appId;
+
+    @Column(name = "app_secret")
+    private String appSecret;
 
     @Column(name = "app_name")
     private String appName;

@@ -1,18 +1,12 @@
 package com.xz.xlogin.service.impl;
 
 import com.xz.xlogin.bean.App;
-import com.xz.xlogin.bean.vo.ApiResult;
-import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.repository.AppRepo;
 import com.xz.xlogin.service.AppService;
 import com.xz.xlogin.utils.RedisUtil;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * @Author: xz
@@ -33,22 +27,24 @@ public class AppServiceImpl implements AppService {
      */
     @Override
     public boolean verifyByAppId(@NonNull String appId) {
-        //todo 删除appid记得也要删除缓存中的appId
+        return getAppSecret(appId) != null;
+    }
 
-        //查询缓存是否存在appId
-        boolean isExist = redisUtil.sHasKey("appId", appId);
+    @Override
+    public String getAppSecret(@NonNull String appId) {
+        //todo 删除appid记得也要删除缓存中的appId
+        //查询缓存中的是否存在
+        boolean isExist = redisUtil.hHasKey("app_auth", appId);
         if (isExist) {
-            return true;
+            return (String) redisUtil.hget("app_auth", appId);
         }
-        //缓存找不到就查询数据库
-        App app = appRepo.findByAppId(appId);
-        if (app != null) {
-            //如果appId的确存在则存入缓存
-            redisUtil.sSet("appId", appId);
-            return true;
+        //走数据库
+        String secret = appRepo.getAppSecret(appId);
+        if (secret != null) {
+            redisUtil.hset("app_auth", appId, secret);
+            return secret;
         }
-        //找遍了缓存和数据库都找不到那就返回false
-        return false;
+        return null;
     }
 
     @Override

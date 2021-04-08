@@ -15,6 +15,13 @@ public interface AppService {
      */
     boolean verifyByAppId(String appId);
 
+    /**
+     * 根据获取AppSecret
+     *
+     * @return appSecret
+     */
+    String getAppSecret(String appId);
+
     App getApp(String appId);
 
     int verifyEmailCode(String email, String code);
