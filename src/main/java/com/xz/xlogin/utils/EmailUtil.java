@@ -6,14 +6,11 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.context.IContext;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @Author: xz
@@ -39,7 +36,6 @@ public class EmailUtil {
         String templateContent = templateEngine.process(template, context);
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        //todo  发件人修改下 ，不要用这个
         //helper.setFrom("c1076409897@126.com");
         helper.setFrom(new InternetAddress("c1076409897@126.com", "XLogin服务", "UTF-8"));
         helper.setTo(email);
