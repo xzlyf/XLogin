@@ -15,7 +15,7 @@
     <name>xlogin</name>
     <description>Xlogin Integrated login program</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>1.8</java.version>
     </properties>
 
 

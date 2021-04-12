@@ -1,6 +1,7 @@
-#发布环境
+#开发环境
 server:
   port: 80
+
 spring:
   datasource:
     username: root

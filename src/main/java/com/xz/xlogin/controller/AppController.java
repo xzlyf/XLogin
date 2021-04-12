@@ -17,8 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @Author: xz
@@ -101,7 +101,7 @@ public class AppController {
     public Object sendVerifyEmail(@RequestParam String email,
                                   @RequestParam String type,
                                   HttpServletRequest request,
-                                  HttpServletResponse response) {
+                                  HttpServletResponse response) throws UnsupportedEncodingException {
         //判断会话是否合法
         HttpSession session = request.getSession();
         //如果redis没有这个session记录也表示会话过期
@@ -110,7 +110,7 @@ public class AppController {
             return new ApiResult(StatusEnum.STATUS_402, null);
         }
         //判断邮箱合法性
-        email = URLDecoder.decode(email, StandardCharsets.UTF_8);//解决@变成%40
+        email = URLDecoder.decode(email, "utf-8");//解决@变成%40
         if (!RegexUtil.doRegex(email, RegexUtil.REGEX_EMAIL)) {
             return new ApiResult(StatusEnum.STATUS_130, null);
         }
