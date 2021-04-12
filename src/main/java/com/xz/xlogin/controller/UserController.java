@@ -169,9 +169,9 @@ public class UserController {
     }
 
     @GetMapping("/logout")
-    public Object logout(@RequestHeader String appId,
-                         @RequestParam String cert,
-                         @RequestParam String token) {
+    public Object logout(@RequestParam(value = "appId") String appId,
+                         @RequestParam(value = "cert") String cert,
+                         @RequestParam(value = "token") String token) {
 
         //获取账号对象
         User user = userServiceImpl.verifyByPwd(cert, token, "token");
@@ -189,9 +189,16 @@ public class UserController {
         return new ApiResult(StatusEnum.SUCCESS, null);
     }
 
+    /**
+     * 重置密码
+     *
+     * @param code      验证码
+     * @param timestamp 请求时间戳
+     * @param st        随机字符串
+     * @return
+     */
     @PostMapping("/reset")
-    public Object reset(@RequestHeader(value = "appId") String appId,
-                        @RequestParam(value = "pwd") String pwd,
+    public Object reset(@RequestParam(value = "pwd") String pwd,
                         @RequestParam(value = "cert") String cert,
                         @RequestParam(value = "type") String type,
                         @RequestParam(value = "code") String code,
@@ -235,4 +242,6 @@ public class UserController {
         }
 
     }
+
+
 }

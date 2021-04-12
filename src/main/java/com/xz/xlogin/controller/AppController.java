@@ -1,8 +1,13 @@
 package com.xz.xlogin.controller;
 
+import com.xz.xlogin.bean.App;
+import com.xz.xlogin.bean.Identity;
+import com.xz.xlogin.bean.User;
+import com.xz.xlogin.bean.entity.AccountMark;
 import com.xz.xlogin.bean.vo.ApiResult;
 import com.xz.xlogin.constant.StatusEnum;
 import com.xz.xlogin.service.impl.AppServiceImpl;
+import com.xz.xlogin.service.impl.IdentityServiceImpl;
 import com.xz.xlogin.service.impl.UserServiceImpl;
 import com.xz.xlogin.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,26 +32,22 @@ public class AppController {
     @Autowired
     UserServiceImpl userServiceImpl;
     @Autowired
+    IdentityServiceImpl identityServiceImpl;
+    @Autowired
     private EmailUtil mailUtil;
     @Autowired
     RedisUtil redisUtil;
+
+    @GetMapping("/now")
+    public Object getNow() {
+        return new ApiResult(StatusEnum.SUCCESS, System.currentTimeMillis());
+    }
 
     @GetMapping("/checkAppId")
     public Object verifyAppId(String appId) {
         if (appId == null)
             return null;
         return new ApiResult(StatusEnum.SUCCESS, appServiceImpl.verifyByAppId(appId));
-    }
-
-    @GetMapping("/test")
-    public void test(HttpServletResponse response, HttpServletRequest request) throws IOException {
-        //接口转发  request.getContextPath() == /app/test
-        response.sendRedirect(request.getContextPath() + "/checkAppId");
-    }
-
-    @GetMapping("/now")
-    public Object getNow() {
-        return new ApiResult(StatusEnum.SUCCESS, System.currentTimeMillis());
     }
 
     @RequestMapping("/verifyImage")
@@ -192,5 +193,38 @@ public class AppController {
                 return new ApiResult(StatusEnum.ERROR, null);
         }
 
+    }
+
+    /**
+     * 验证
+     *
+     * @param timestamp 请求时间戳
+     * @param st        随机字符串
+     */
+    @GetMapping("/verifyUser")
+    public Object verifyUser(@RequestParam(value = "appId") String appId,
+                             @RequestParam(value = "token") String token,
+                             @RequestParam(value = "cert") String cert,
+                             @RequestParam(value = "type") String type,
+                             @RequestParam(value = "t", required = false) Long timestamp,
+                             @RequestParam(value = "st", required = false) String st) {
+
+        //验证账户是否合法账户
+        AccountMark mark = userServiceImpl.existCert(cert, type);
+        if (!mark.isExist()) {
+            return new ApiResult(StatusEnum.getEnum(mark.getStatusCode()), null);
+        }
+        //验证token
+        App app = appServiceImpl.getApp(appId);
+        User user = userServiceImpl.verifyByPwd(cert, token, "token");
+        if (user == null) {
+            return new ApiResult(StatusEnum.STATUS_601, null);
+        }
+        Identity identity = identityServiceImpl.verifyToken(app, user, token);
+        if (identity != null) {
+            return new ApiResult(StatusEnum.SUCCESS, null);
+        } else {
+            return new ApiResult(StatusEnum.STATUS_600, null);
+        }
     }
 }
